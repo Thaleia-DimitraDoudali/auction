@@ -1,12 +1,16 @@
 package server;
 
 public class Item {
+	
+	//Items will be stored on a database, so that concurrency control by DBMS
+	
 	private int itemId;
 	private int initialPrice;
 	private String description;
 	private int currentPrice;
 	private int highestBidderId;
 	
+	//Constructor
 	public Item(int itemId, int initialPrice, String description) {
 		this.setItemId(itemId);
 		this.setInitialPrice(initialPrice);
@@ -15,6 +19,7 @@ public class Item {
 		this.setHighestBidderId(0);				//bidder id = 0 means no one yet 
 	}
 
+	//Getters - setters
 	public int getItemId() {
 		return itemId;
 	}
