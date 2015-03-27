@@ -3,7 +3,7 @@ package client;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Bidder {
+public class Bidder implements Runnable{
 	
 	private int bidderId;
 	private String bidderName;
@@ -11,6 +11,7 @@ public class Bidder {
 	
 	//Constructor
 	public Bidder(int bidderId, String bidderName){
+		//maybe id won't be useful
 		this.setBidderId(bidderId);
 		this.setBidderName(bidderName);
 	}
@@ -30,6 +31,11 @@ public class Bidder {
 
 	public void setBidderName(String bidderName) {
 		this.bidderName = bidderName;
+	}
+
+	//What a bidder does - maybe not useful
+	public void run() {
+		
 	}
 	
 }

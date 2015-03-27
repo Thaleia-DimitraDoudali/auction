@@ -1,6 +1,6 @@
 package server;
 
-public class Launch {
+public class LaunchServer {
 
 	public static void main(String[] args) {
 
@@ -9,10 +9,7 @@ public class Launch {
 		//TODO If 2 auctioneers store items to a mysql database
 
 		//TODO Just one auctioneer for now - later on add second one and implement sync server.
-        (new Thread(new Auctioneer(null))).start();
-        
-        //Opens TCP socket for bidders to connect
-        
+        (new Thread(new Auctioneer(null))).start();    
 	}
 
 }
