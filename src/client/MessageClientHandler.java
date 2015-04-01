@@ -1,10 +1,7 @@
 package client;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
 
@@ -29,6 +26,7 @@ public class MessageClientHandler {
 	
 	//Send a connect message to auctioneer
 	public void sendConnect(Bidder bidder) {
+		//protocol: id + connect + etc
 		String message = "connect" + ' ' + bidder.getBidderName();
 		try {
 			OutputStream os = socketId.getOutputStream();
@@ -62,9 +60,12 @@ public class MessageClientHandler {
 	}
 	
 	//TODO: Messages that a bidder can receive
+	
 	public void decodeMessage(String message) {
 		//According to message call the appropriate Bidder function, which will
 		//usually have to inform the bidder (command line out) about what happened!
+		
+		
 		
 		//bid_item
 		//start_bidding

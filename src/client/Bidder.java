@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Bidder implements Runnable{
 	
-	private int bidderId;
+	//private int bidderId;
 	private String bidderName;
 	private List<server.Item> itemsBought = new ArrayList<server.Item>();
 	
@@ -34,8 +34,8 @@ public class Bidder implements Runnable{
 	}
 
 	//What a bidder does - maybe not useful
-	public void run() {
+	//public void run() {
 		
-	}
+	//}
 	
 }

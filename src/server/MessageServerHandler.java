@@ -34,6 +34,20 @@ public class MessageServerHandler {
 	
 	//Receive message
 	public void receiveMessage(){
+		
+		//connect = 0
+		//i_am_interested = 1
+		//my_bid = 2
+		//quit = 3
+		//bid_item = 4
+		//start_bidding = 5
+		//new_high_bid = 6
+		//stop_bidding = 7
+		//auction_complete = 8
+		//duplicate_name = 9
+		
+		
+		
 		try {
 			BufferedReader br = 
 					new BufferedReader(new InputStreamReader(socketId.getInputStream()));
@@ -43,15 +57,24 @@ public class MessageServerHandler {
 			e.printStackTrace();
 		}
 		//According to what type of message auctioneer should act accordingly
+	
+		//tha stelnei kai mhnumata ston bider
 		
 		//if connect auctioneer.addToRegTable(RegTableEntry);
 		
 		//if interested auctioneer.addToCurrentBiders(RegTableEntry);
 		
 		//if my_bid auctioneer.receiveBid(amount, itemId);
+			//check price if higher than current price
+	
 		
 		//if quit close appropriate sockets
 
+	}
+	
+	public void sendMessage(String message) {
+		if message.equals("bid_item")
+			auctioneer.bidItem();
 	}
 
 }

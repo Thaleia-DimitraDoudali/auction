@@ -8,7 +8,7 @@ public class Item {
 	private int initialPrice;
 	private String description;
 	private int currentPrice;
-	private int highestBidderId;
+	private int highestBidderId; //name
 	
 	//Constructor
 	public Item(int itemId, int initialPrice, String description) {
