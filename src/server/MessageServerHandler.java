@@ -3,27 +3,31 @@ package server;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
+import client.Bidder;
 
 //Message format = message's name + ' ' + rest;
 
 public class MessageServerHandler {
-	private Socket socketId;
+	//private Socket socketId;
 	private Auctioneer auctioneer;
 	
 	//Constructor
-	public MessageServerHandler(Auctioneer auctioneer, Socket socketId){
-		this.setSocketId(socketId);
+	public MessageServerHandler(Auctioneer auctioneer){
 		this.setAuctioneer(auctioneer);
 	}
 
 	//Getters - setters
-	public Socket getSocketId() {
-		return socketId;
-	}
-	public void setSocketId(Socket socketId) {
-		this.socketId = socketId;
-	}
+	//public Socket getSocketId() {
+	//	return socketId;
+	//}
+	
+	//public void setSocketId(Socket socketId) {
+	//	this.socketId = socketId;
+	//}
+	
 	public Auctioneer getAuctioneer() {
 		return auctioneer;
 	}
@@ -33,7 +37,7 @@ public class MessageServerHandler {
 	}
 	
 	//Receive message
-	public void receiveMessage(){
+	public void receiveMessage(String message, Socket socketId){
 		
 		//connect = 0
 		//i_am_interested = 1
@@ -45,6 +49,49 @@ public class MessageServerHandler {
 		//stop_bidding = 7
 		//auction_complete = 8
 		//duplicate_name = 9
+		
+		char messageId = message.charAt(0);
+		String[] args;
+		Bidder bidder;
+		
+		switch (messageId) {
+		case '0':
+			args = message.split("\\s+");
+			bidder = new Bidder(args[2]);
+			RegTableEntry newEntry = new RegTableEntry(socketId, bidder); 
+			auctioneer.addToRegTable(newEntry);
+			break;
+		case '1':
+			args = message.split("\\s+");
+			bidder = new Bidder(args[2]);
+			RegTableEntry newInterest = new RegTableEntry(socketId, bidder); 
+			auctioneer.addToInterestedBidders(newInterest);
+			break;
+		case '2':
+			args = message.split("\\s+");
+			bidder = new Bidder(args[4]);
+			RegTableEntry tempEntry = new RegTableEntry(socketId, bidder);
+			auctioneer.receiveBid(Integer.parseInt(args[2]), Integer.parseInt(args[3]), tempEntry);
+			break;
+		case '3':
+			myString.split("\\s+");
+			//remove bidder from interested and regtable
+			break;
+		case '4':
+			break;
+		case '5':
+			break;
+		case '6':
+			break;
+		case '7':
+			break;
+		case '8':
+			break;
+		case '9':
+			break;
+		default:
+			break;
+		}
 		
 		
 		
@@ -72,9 +119,16 @@ public class MessageServerHandler {
 
 	}
 	
-	public void sendMessage(String message) {
-		if message.equals("bid_item")
-			auctioneer.bidItem();
+	public void sendMessage(String message, RegTableEntry entry) {
+		Socket socketId = entry.getSocketId();
+		try {
+			OutputStream os = socketId.getOutputStream();
+			PrintWriter pw = new PrintWriter(os, true);
+			pw.println(message);
+			pw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 }

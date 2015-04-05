@@ -8,7 +8,7 @@ public class Item {
 	private int initialPrice;
 	private String description;
 	private int currentPrice;
-	private int highestBidderId; //name
+	private String highestBidderName; //name
 	
 	//Constructor
 	public Item(int itemId, int initialPrice, String description) {
@@ -16,7 +16,7 @@ public class Item {
 		this.setInitialPrice(initialPrice);
 		this.setDescription(description);
 		this.setCurrentPrice(initialPrice);
-		this.setHighestBidderId(0);				//bidder id = 0 means no one yet 
+		this.setHighestBidderName("no_holder");				//bidder id = 0 means no one yet 
 	}
 
 	//Getters - setters
@@ -52,11 +52,11 @@ public class Item {
 		this.currentPrice = currentPrice;
 	}
 
-	public int getHighestBidderId() {
-		return highestBidderId;
+	public String getHighestBidderName() {
+		return highestBidderName;
 	}
 
-	public void setHighestBidderId(int highestBidderId) {
-		this.highestBidderId = highestBidderId;
+	public void setHighestBidderName(String highestBidderName) {
+		this.highestBidderName = highestBidderName;
 	}
 }

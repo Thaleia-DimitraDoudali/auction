@@ -6,22 +6,21 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Auctioneer implements Runnable{
+public class Auctioneer implements Runnable {
 	
 	private List<Item> bidItems = new ArrayList<Item>();
 	private List<RegTableEntry> regTable = new ArrayList<RegTableEntry>();
-	private int currentItem;
+	private Item currentItem;
 	//For the bidders interested on the current item we can have either a list (replicated data) 
 	//or an integer "interested" field on regTable entry
 	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>(); //interested
 	private int highestBid;
 	private String highestBidder;
-	MessageServerHandler handler = new MessageServerHandler();
+	MessageServerHandler handler = new MessageServerHandler(this);
 	
 	//Constructor
 	public Auctioneer(List<Item> bidItems){
 		this.setBidItems(bidItems);
-		highestBid = 0;
 	}
 
 	//Getters - setters
@@ -33,11 +32,11 @@ public class Auctioneer implements Runnable{
 		this.bidItems = bidItems;
 	}
 
-	public int getCurrentItem() {
+	public Item getCurrentItem() {
 		return currentItem;
 	}
 
-	public void setCurrentItem(int currentItem) {
+	public void setCurrentItem(Item currentItem) {
 		this.currentItem = currentItem;
 	}
 	
@@ -53,12 +52,14 @@ public class Auctioneer implements Runnable{
 	
 	//TODO
 	public void receiveBid(int amount, int itemId, RegTableEntry entry) {
-		if (highestBid < amount) {
-			highestBid = amount;
-			highestBidder = (entry.getBidder()).getBidderName();
-			String message = "6 new_high_bid" + ' ' + highestBid + highestBidder;
-			for (RegTableEntry entry2 : regTable) {
-				handler.sendMessage(message, entry2);
+		if (itemId == currentItem.getItemId()) {
+			if (currentItem.getCurrentPrice() < amount) {
+				currentItem.setCurrentPrice(amount);
+				currentItem.setHighestBidderName((entry.getBidder()).getBidderName());
+				String message = "6 new_high_bid" + ' ' + currentItem.getCurrentPrice() + currentItem.getHighestBidderName();
+				for (RegTableEntry entry2 : interestedBidders) {
+					handler.sendMessage(message, entry2);
+				}
 			}
 		}
 		//check if valid amount
@@ -66,15 +67,22 @@ public class Auctioneer implements Runnable{
 		//If many auctioneers synchronize!!
 	}
 	
-	public void bidItem(Item item) {
+	public void bidItem() {
 		//for all bidders in regtable send message bid_item
-		for (RegTableEntry bidder : regTable) {
-			String message = "4 new_item" + ' ' + item.getItemId() + ' ' + item.getInitialPrice() + ' ' + item.getDescription();
-			handler.sendMessage(message, bidder);
+		for (RegTableEntry entry : regTable) {
+			String message = "4 new_item" + ' ' + currentItem.getItemId() + ' ' + currentItem.getInitialPrice() + ' ' + currentItem.getDescription();
+			handler.sendMessage(message, entry);
 		}
 		//handler.sendMessage("bid_item")
 	}
+	
+	public void startBidding() {
+		String message = "5 start_bidding" + ' ' + currentItem.getItemId() + ' ' + currentItem.getInitialPrice();
+		for (RegTableEntry entry : interestedBidders)
+			handler.sendMessage(message, entry);
+	}
 
+	
 	//What an auctioneer does
 	public void run() {
 		System.out.println("Auctioneer up and running!");
@@ -189,3 +197,5 @@ public class Auctioneer implements Runnable{
 	}
 
 }
+			
+	
