@@ -15,7 +15,8 @@ public class Auctioneer implements Runnable{
 	//or an integer "interested" field on regTable entry
 	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>(); //interested
 	private int highestBid;
-	private RegTableEntry highestBidder;
+	private String highestBidder;
+	MessageServerHandler handler = new MessageServerHandler();
 	
 	//Constructor
 	public Auctioneer(List<Item> bidItems){
@@ -51,11 +52,14 @@ public class Auctioneer implements Runnable{
 	}
 	
 	//TODO
-	public void receiveBid(int amount, int itemId, RegTableEntry bidder) {
+	public void receiveBid(int amount, int itemId, RegTableEntry entry) {
 		if (highestBid < amount) {
 			highestBid = amount;
-			highestBidder = bidder;
-			//Message handler????
+			highestBidder = (entry.getBidder()).getBidderName();
+			String message = "6 new_high_bid" + ' ' + highestBid + highestBidder;
+			for (RegTableEntry entry2 : regTable) {
+				handler.sendMessage(message, entry2);
+			}
 		}
 		//check if valid amount
 		//change item's current price, highest bidder
@@ -64,7 +68,10 @@ public class Auctioneer implements Runnable{
 	
 	public void bidItem(Item item) {
 		//for all bidders in regtable send message bid_item
-			String message = "new_item" + ' ' + item.getItemId() + ' ' + item.getInitialPrice() + ' ' + item.getDescription();
+		for (RegTableEntry bidder : regTable) {
+			String message = "4 new_item" + ' ' + item.getItemId() + ' ' + item.getInitialPrice() + ' ' + item.getDescription();
+			handler.sendMessage(message, bidder);
+		}
 		//handler.sendMessage("bid_item")
 	}
 
@@ -108,7 +115,7 @@ public class Auctioneer implements Runnable{
 				//add clientSocket to a list for select later
 				
 				//busy loop wait connect message of bidder
-				MessageServerHandler handler = new MessageServerHandler(this, clientSocket);
+				//MessageServerHandler handler = new MessageServerHandler(this, clientSocket);
 				//has to be connect
 				handler.receiveMessage();
 				//at this point bidder to regtable
