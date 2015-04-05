@@ -1,21 +1,23 @@
 package server;
 
+import java.net.Socket;
+
 public class RegTableEntry {
-	private int socketId;
+	private Socket socketId;
 	private client.Bidder bidder;
 	
 	//Constructor
-	public RegTableEntry(int socketId, client.Bidder bidder) {
+	public RegTableEntry(Socket socketId, client.Bidder bidder) {
 		this.setSocketId(socketId);
 		this.setBidder(bidder);
 	}
 
 	//Getters - setters
-	public int getSocketId() {
+	public Socket getSocketId() {
 		return socketId;
 	}
 
-	public void setSocketId(int socketId) {
+	public void setSocketId(Socket socketId) {
 		this.socketId = socketId;
 	}
 
