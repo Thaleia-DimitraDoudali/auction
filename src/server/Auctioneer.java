@@ -13,11 +13,14 @@ public class Auctioneer implements Runnable{
 	private int currentItem;
 	//For the bidders interested on the current item we can have either a list (replicated data) 
 	//or an integer "interested" field on regTable entry
-	private List<RegTableEntry> currentBidders = new ArrayList<RegTableEntry>(); //interested
+	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>(); //interested
+	private int highestBid;
+	private RegTableEntry highestBidder;
 	
 	//Constructor
 	public Auctioneer(List<Item> bidItems){
 		this.setBidItems(bidItems);
+		highestBid = 0;
 	}
 
 	//Getters - setters
@@ -39,23 +42,29 @@ public class Auctioneer implements Runnable{
 	
 	//TODO
 	public void addToRegTable(RegTableEntry entry) {
-		
+		regTable.add(entry);
 	}
 	
 	//TODO
-	public void addToCurrentBidders(RegTableEntry entry) {
-		
+	public void addToInterestedBidders(RegTableEntry entry) {
+		interestedBidders.add(entry);
 	}
 	
 	//TODO
-	public void receiveBid(int amount, int itemId) {
+	public void receiveBid(int amount, int itemId, RegTableEntry bidder) {
+		if (highestBid < amount) {
+			highestBid = amount;
+			highestBidder = bidder;
+			//Message handler????
+		}
 		//check if valid amount
 		//change item's current price, highest bidder
 		//If many auctioneers synchronize!!
 	}
 	
-	public void bidItem() {
+	public void bidItem(Item item) {
 		//for all bidders in regtable send message bid_item
+			String message = "new_item" + ' ' + item.getItemId() + ' ' + item.getInitialPrice() + ' ' + item.getDescription();
 		//handler.sendMessage("bid_item")
 	}
 
@@ -85,7 +94,10 @@ public class Auctioneer implements Runnable{
 			
 			for items in bidItems {
 			
+				highestBid = item.getInitialPrice();
 				//PROS TO PARON
+				//to time<L tha alla3ei
+				//se auto to while sundeontai oi prwtoi bidders
 			while (time<L) {
 			//New client - bidder connects
 			try {
@@ -108,7 +120,7 @@ public class Auctioneer implements Runnable{
 			while (bidding_for_this_item_is_on) {
 						
 				//send message bid item
-				
+				//wait in while for all bidders to express interest in item
 				while (time < L) {
 					
 					
@@ -145,15 +157,20 @@ public class Auctioneer implements Runnable{
 					}
 					if (no_one_bid_sth)
 						//10% katw
+						//ay3hse tous kuklous xwris offer
+						//send new_high_bid message
+						//h pigaine sto epomeno antikeimeno
 					if (someone_bought)
 						//vges apo to while
-						//kai pes se olous poios pire ti 
+						//kai pes se olous poios pire ti
+
 					
 				}
 				
 				//TODO: Check if end of auction 
 				/*if (bidItems.isEmpty()) {
 					auctionIsUp = false;
+					send auction_complete message to everyone
 				}*/
 			
 		
