@@ -10,20 +10,20 @@ public class Bidder implements Runnable{
 	private List<server.Item> itemsBought = new ArrayList<server.Item>();
 	
 	//Constructor
-	public Bidder(int bidderId, String bidderName){
+	public Bidder(String bidderName){
 		//maybe id won't be useful
-		this.setBidderId(bidderId);
+		//this.setBidderId(bidderId);
 		this.setBidderName(bidderName);
 	}
 
 	//Getters - setters
-	public int getBidderId() {
-		return bidderId;
-	}
+	//public int getBidderId() {
+	//	return bidderId;
+	//}
 
-	public void setBidderId(int bidderId) {
-		this.bidderId = bidderId;
-	}
+	//public void setBidderId(int bidderId) {
+	//	this.bidderId = bidderId;
+	//}
 
 	public String getBidderName() {
 		return bidderName;
