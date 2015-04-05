@@ -42,7 +42,18 @@ public class Auctioneer implements Runnable {
 	
 	//TODO
 	public void addToRegTable(RegTableEntry entry) {
-		regTable.add(entry);
+		String temp = (entry.getBidder()).getBidderName();
+		int flag = 0;
+		for (RegTableEntry entry2 : regTable) {
+			if (temp.equals((entry2.getBidder()).getBidderName())) {
+				String message = "9 duplicate_name Please abort";
+				handler.sendMessage(message,entry);
+				flag = 1;
+				break;
+			}
+		}
+		if (flag==0)
+			regTable.add(entry);
 	}
 	
 	//TODO
@@ -82,6 +93,25 @@ public class Auctioneer implements Runnable {
 			handler.sendMessage(message, entry);
 	}
 
+	public void newHighBid() {
+		String message = "6 new_high_bid" + ' ' + currentItem.getCurrentPrice() + ' ' + currentItem.getHighestBidderName() + ' ' + currentItem.getItemId();
+		for (RegTableEntry entry : interestedBidders)
+			handler.sendMessage(message, entry);
+	}
+	
+	public void stopBidding() {
+		String message = "7 stop_bidding" + ' ' + currentItem.getCurrentPrice() + ' ' + currentItem.getHighestBidderName() + ' ' + currentItem.getItemId();
+		for (RegTableEntry entry : interestedBidders)
+			handler.sendMessage(message, entry);
+	}
+	
+	public void auctionComplete() {
+		String message = "8 auction_complete";
+		for (RegTableEntry entry : regTable)
+			handler.sendMessage(message, entry);
+	}
+	
+	
 	
 	//What an auctioneer does
 	public void run() {
