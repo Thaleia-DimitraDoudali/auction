@@ -85,7 +85,7 @@ public class MessageClientHandler {
 	
 	//TODO
 	public void sendQuit() {
-		String message = "4 quit" + ' ' + bidder.getBidderName();
+		String message = "3 quit" + ' ' + bidder.getBidderName();
 		sendString(message);
 	}
 	
