@@ -61,34 +61,25 @@ public class MessageServerHandler {
 			RegTableEntry newEntry = new RegTableEntry(socketId, bidder); 
 			auctioneer.addToRegTable(newEntry);
 			return 0;
-			break;
 		case '1':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[2]);
 			RegTableEntry newInterest = new RegTableEntry(socketId, bidder); 
 			auctioneer.addToInterestedBidders(newInterest);
 			return 1;
-			break;
 		case '2':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[4]);
 			RegTableEntry tempEntry = new RegTableEntry(socketId, bidder);
 			auctioneer.receiveBid(Integer.parseInt(args[2]), Integer.parseInt(args[3]), tempEntry);
 			return 2;
-			break;
 		case '3':
-<<<<<<< HEAD
-			myString.split("\\s+");
-			//remove bidder from interested and regtable
-			return 3;
-=======
 			args = message.split("\\s+");
 			bidder = new Bidder(args[2]);
 			RegTableEntry entry = new RegTableEntry(socketId, bidder); 
 			auctioneer.removeFromInterestedBidders(entry);
 			auctioneer.removeFromRegTable(entry);
->>>>>>> 0bff555931eaacb1b5ab53394d52bb387af100cd
-			break;
+			return 3;
 		default:
 			break;
 		}
@@ -116,7 +107,7 @@ public class MessageServerHandler {
 	
 		
 		//if quit close appropriate sockets
-
+		return 5;
 	}
 	
 	public void sendMessage(String message, RegTableEntry entry) {
