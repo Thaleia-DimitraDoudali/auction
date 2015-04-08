@@ -56,9 +56,17 @@ public class Auctioneer implements Runnable {
 			regTable.add(entry);
 	}
 	
+	public void removeFromRegTable(RegTableEntry entry) {
+		regTable.remove(entry);
+	}
+	
 	//TODO
 	public void addToInterestedBidders(RegTableEntry entry) {
 		interestedBidders.add(entry);
+	}
+	
+	public void removeFromInterestedBidders(RegTableEntry entry) {
+		interestedBidders.remove(entry);
 	}
 	
 	//TODO
