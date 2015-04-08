@@ -5,13 +5,13 @@ public class Item {
 	//Items will be stored on a database, so that concurrency control by DBMS
 	
 	private int itemId;
-	private int initialPrice;
+	private double initialPrice;
 	private String description;
-	private int currentPrice;
+	private double currentPrice;
 	private String highestBidderName; //name
 	
 	//Constructor
-	public Item(int itemId, int initialPrice, String description) {
+	public Item(int itemId, double initialPrice, String description) {
 		this.setItemId(itemId);
 		this.setInitialPrice(initialPrice);
 		this.setDescription(description);
@@ -28,11 +28,11 @@ public class Item {
 		this.itemId = itemId;
 	}
 
-	public int getInitialPrice() {
+	public double getInitialPrice() {
 		return initialPrice;
 	}
 
-	public void setInitialPrice(int initialPrice) {
+	public void setInitialPrice(double initialPrice) {
 		this.initialPrice = initialPrice;
 	}
 
@@ -44,11 +44,11 @@ public class Item {
 		this.description = description;
 	}
 
-	public int getCurrentPrice() {
+	public double getCurrentPrice() {
 		return currentPrice;
 	}
 
-	public void setCurrentPrice(int currentPrice) {
+	public void setCurrentPrice(double currentPrice) {
 		this.currentPrice = currentPrice;
 	}
 

@@ -37,7 +37,7 @@ public class MessageServerHandler {
 	}
 	
 	//Receive message
-	public void receiveMessage(String message, Socket socketId){
+	public int receiveMessage(String message, Socket socketId){
 		
 		//connect = 0
 		//i_am_interested = 1
@@ -60,22 +60,26 @@ public class MessageServerHandler {
 			bidder = new Bidder(args[2]);
 			RegTableEntry newEntry = new RegTableEntry(socketId, bidder); 
 			auctioneer.addToRegTable(newEntry);
+			return 0;
 			break;
 		case '1':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[2]);
 			RegTableEntry newInterest = new RegTableEntry(socketId, bidder); 
 			auctioneer.addToInterestedBidders(newInterest);
+			return 1;
 			break;
 		case '2':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[4]);
 			RegTableEntry tempEntry = new RegTableEntry(socketId, bidder);
 			auctioneer.receiveBid(Integer.parseInt(args[2]), Integer.parseInt(args[3]), tempEntry);
+			return 2;
 			break;
 		case '3':
 			myString.split("\\s+");
 			//remove bidder from interested and regtable
+			return 3;
 			break;
 		default:
 			break;

@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import server.Item;
+import server.MessageServerHandler;
 
 public class Auctioneer implements Runnable {
 	
@@ -135,93 +137,90 @@ public class Auctioneer implements Runnable {
 		//Loop constantly waiting for bidders to connect
 		Socket clientSocket = null;
 		
-		while (auctionIsUp) {
+		int time=1;
+		int L=1;
+		int interested=1;
+		int bidded=1;
+		int offer_is_on=1;
+		int counter=1;
+		
+		for (Item item : bidItems){
 			
-			for items in bidItems {
-			
-				highestBid = item.getInitialPrice();
-				//PROS TO PARON
-				//to time<L tha alla3ei
-				//se auto to while sundeontai oi prwtoi bidders
-			while (time<L) {
-			//New client - bidder connects
-			try {
-				//blocks on accept until a client connects
-				//if i am currently accepting or no more than five waiting
-				clientSocket = serverSocket.accept();
-				
-				//add clientSocket to a list for select later
-				
-				//busy loop wait connect message of bidder
-				//MessageServerHandler handler = new MessageServerHandler(this, clientSocket);
-				//has to be connect
-				handler.receiveMessage();
-				//at this point bidder to regtable
-				System.out.println("Bidder connects to Auctioneer");
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			
-			while (bidding_for_this_item_is_on) {
-						
-				//send message bid item
-				//wait in while for all bidders to express interest in item
-				while (time < L) {
-					
-					
+			//L time to connect
+			while (time<L){
+				try {
 					clientSocket = serverSocket.accept();
-
-					
-					//i should wait for i am interested messages from bidders
-				
-					//SELECT FROM sockets of all in regtable connected
-					 
-					//see each clientSocket if it has to read something from the bidder's socket
-					//has to read only i_am_interested messages, if other message reject
-					
-					//if receive message interested receiveMessage()
+					String message="temp message";
+					Socket socketid=null;
+					handler.receiveMessage(message,socketid);
+					System.out.println("Bidder connects to Auctioneer");
+				} catch (IOException e) {
+					e.printStackTrace();
 				}
+			}//
+			
+			//set currentItem=item
+			currentItem.setItemId(item.getItemId());
+			currentItem.setInitialPrice(item.getInitialPrice());
+			currentItem.setDescription(item.getDescription());
+			currentItem.setCurrentPrice(item.getCurrentPrice());
+			currentItem.setHighestBidderName(item.getHighestBidderName());
+
+			//send start bidding to all
+			this.bidItem();
+			
+			//receive i am interested messages
+			while (time<L){
+				try {
+					clientSocket = serverSocket.accept();
+					String message="temp message";
+					Socket socketid=null;
+					handler.receiveMessage(message,socketid);
+					System.out.println("Bidder connects to Auctioneer and others send i_am_interested");
+					interested++;
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}//
+			
+			if (interested>=2){
 				
-				clientSocket = serverSocket.accept();
-				//autounou to socket prepei na to valeis sto sunolo tou select
-				//kai apla de tha kaneis kati otan pairneis mhnuma
+				this.startBidding();
 				
-				//if no one interested skip item go to next item
-				
-				// send start biding message to those interested
-				
-				while (offer_is_on) {
+				while (offer_is_on==1){
 					
-					//an 5 kukloi offer_ison = false
-				
-					//stelnei ti timh to bid stous bidders
 				
 					while (time<L) {
-						//SELECT apo olous ti exoun na poun
-						//if new_high_bid time=0 and send message new high bid to bidders
-					}
-					if (no_one_bid_sth)
-						//10% katw
-						//ay3hse tous kuklous xwris offer
-						//send new_high_bid message
-						//h pigaine sto epomeno antikeimeno
-					if (someone_bought)
-						//vges apo to while
-						//kai pes se olous poios pire ti
-
 					
+						String message="one of the bids";
+						Socket socketid=null;
+						int res=handler.receiveMessage(message, socketid);
+						if (res==2) {
+							time=0;
+							bidded++;
+						}
+					}
+					
+					if (bidded==0){
+						currentItem.setInitialPrice(0.9*currentItem.getInitialPrice());
+						counter++;
+						if (counter>=6){
+							offer_is_on=0;
+						}
+						else
+							this.newHighBid();						
+					}
+					else {
+						this.stopBidding();
+						offer_is_on=0;
+					}
 				}
+			}
 				
-				//TODO: Check if end of auction 
-				/*if (bidItems.isEmpty()) {
-					auctionIsUp = false;
-					send auction_complete message to everyone
-				}*/
 			
-		
 		}
 		
-		
+		this.auctionComplete();
 		
 		
 	}
