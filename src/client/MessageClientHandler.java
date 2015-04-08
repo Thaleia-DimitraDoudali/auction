@@ -53,7 +53,7 @@ public class MessageClientHandler {
 	//Compose and send a connect message to auctioneer
 	public void sendConnect() {
 		//protocol: id + connect + etc
-		String message = "connect" + ' ' + bidder.getBidderName();
+		String message = "0 connect" + ' ' + bidder.getBidderName();
 		sendString(message);
 	}
 	
