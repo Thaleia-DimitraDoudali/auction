@@ -65,7 +65,7 @@ public class MessageClientHandler {
 	}
 	
 	//Compose and send a my_bid message to auctioneer
-	//!! confirmation that amount > price should be in Client
+	//!! confirmation that amount > price should be in Bidder, not in handler
 	public void sendBid(Item item, int amount) {
 		String message = "2 my_bid" + ' ' + amount + ' ' + item.getItemId() + ' ' + bidder.getBidderName();
 		sendString(message);
@@ -92,7 +92,7 @@ public class MessageClientHandler {
 	
 	//TODO: Messages that a bidder can receive
 	
-	public void decodeMessage(String message) {
+	public void receiveMessage(String message) {
 		//According to message call the appropriate Bidder function, which will
 		//usually have to inform the bidder (command line out) about what happened!
 		

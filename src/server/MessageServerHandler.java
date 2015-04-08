@@ -77,9 +77,17 @@ public class MessageServerHandler {
 			return 2;
 			break;
 		case '3':
+<<<<<<< HEAD
 			myString.split("\\s+");
 			//remove bidder from interested and regtable
 			return 3;
+=======
+			args = message.split("\\s+");
+			bidder = new Bidder(args[2]);
+			RegTableEntry entry = new RegTableEntry(socketId, bidder); 
+			auctioneer.removeFromInterestedBidders(entry);
+			auctioneer.removeFromRegTable(entry);
+>>>>>>> 0bff555931eaacb1b5ab53394d52bb387af100cd
 			break;
 		default:
 			break;

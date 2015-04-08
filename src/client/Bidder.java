@@ -37,5 +37,7 @@ public class Bidder implements Runnable{
 	//public void run() {
 		
 	//}
-	
+	//TODO: use an item variable that will be used by MessageClientHandler. It can be passed as an argument or I can make set and get functions
+	//		This is not needed if handler only decodes messages and calls the bidder to processes the decoded messages. We should talk about this.
+	//TODO: make functions that will be called by the message handler to (perhaps process data and) print in terminal.
 }
