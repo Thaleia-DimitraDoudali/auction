@@ -59,7 +59,7 @@ public class LaunchClient {
 		if (flag == 0) {
 			System.out.println("Bidder is connected to the Auctioneer");
 			//Start the bidder thread
-			(new Thread(new Bidder(null))).start();
+			(new Thread(bidder)).start();
 		}
 		else {
 			System.out.println("Duplicate name Error. Bidder aborts. Please try with a different name");
