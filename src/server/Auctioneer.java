@@ -1,10 +1,9 @@
 package server;
-
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.*;
+import java.net.*;
+import java.nio.*;
+import java.nio.channels.*;
+import java.util.*;
 import server.Item;
 import server.MessageServerHandler;
 
@@ -16,9 +15,10 @@ public class Auctioneer implements Runnable {
 	//For the bidders interested on the current item we can have either a list (replicated data) 
 	//or an integer "interested" field on regTable entry
 	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>(); //interested
-	private int highestBid;
-	private String highestBidder;
+	//private int highestBid;
+	//private String highestBidder;
 	MessageServerHandler handler = new MessageServerHandler(this);
+	private final ByteBuffer buffer = ByteBuffer.allocate( 16384 );
 	
 	//Constructor
 	public Auctioneer(List<Item> bidItems){
@@ -58,17 +58,9 @@ public class Auctioneer implements Runnable {
 			regTable.add(entry);
 	}
 	
-	public void removeFromRegTable(RegTableEntry entry) {
-		regTable.remove(entry);
-	}
-	
 	//TODO
 	public void addToInterestedBidders(RegTableEntry entry) {
 		interestedBidders.add(entry);
-	}
-	
-	public void removeFromInterestedBidders(RegTableEntry entry) {
-		interestedBidders.remove(entry);
 	}
 	
 	//TODO
@@ -129,12 +121,21 @@ public class Auctioneer implements Runnable {
 		
 		//listens on 2 ports: 1 for bidders 1 for bids
 		//Server side socket
-		int bidderPort = 2223;
-		ServerSocket serverSocket = null;
+		int bidderPort_con = 2223;
+		int bidderPort_dat = 2224;
+		ServerSocket ss_con = null;
+		ServerSocket ss_dat = null;
+		ServerSocketChannel ssc_con;
+		InetSocketAddress isa_con;
+		Selector selector = Selector.open();
+	    
 		try {
-			//backlog queue size = 5 (not working yet)
-			serverSocket = new ServerSocket(bidderPort, 5);
-			System.out.println("Server side socket for bidders is up.");
+			ssc_con = ServerSocketChannel.open();
+			ssc_con.configureBlocking( false );
+			ss_con = ssc_con.socket();
+		    isa_con = new InetSocketAddress( bidderPort_con );
+		    ss_con.bind( isa_con );
+		    ssc_con.register( selector, SelectionKey.OP_ACCEPT ); 
 		} catch (IOException e) {
 			System.out.println("Couldn't listen on bidders port");
 		}
@@ -142,26 +143,108 @@ public class Auctioneer implements Runnable {
 		
 		//Auction will end when all items sold etc.
 		boolean auctionIsUp = true;
-		//Loop constantly waiting for bidders to connect
-		Socket clientSocket = null;
 		
-		int time=1;
+		Socket clientSocket = null;
 		int L=1;
+		long tStart,tEnd;
+		tEnd = System.currentTimeMillis();
+		tStart = System.currentTimeMillis();
+		//Loop constantly waiting for bidders to connect
+		while ((tEnd-tStart)<L){
+			try {
+				
+				int num = selector.select();
+				if (num == 0) {
+			          continue;
+			        }
+				Set keys = selector.selectedKeys();
+		        Iterator it = keys.iterator();
+		        
+		        while (it.hasNext()) {
+		        	 
+		        	SelectionKey key = (SelectionKey)it.next();
+		        	if ((key.readyOps() & SelectionKey.OP_ACCEPT) ==
+		                    SelectionKey.OP_ACCEPT) {
+		        		Socket s = ss_con.accept();
+		        		SocketChannel sc = s.getChannel();
+		                sc.configureBlocking( false );
+		                sc.register( selector, SelectionKey.OP_READ );
+		        	}
+		        }
+				tEnd = System.currentTimeMillis();
+				
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		int interested=1;
 		int bidded=1;
 		int offer_is_on=1;
 		int counter=1;
 		
+		
 		for (Item item : bidItems){
 			
 			//L time to connect
-			while (time<L){
+			
+			tEnd = System.currentTimeMillis();
+			tStart = System.currentTimeMillis();
+			
+			while ((tEnd-tStart)<L){
 				try {
-					clientSocket = serverSocket.accept();
+					
+					int num = selector.select();
+					if (num == 0) {
+				          continue;
+				        }
+					Set keys = selector.selectedKeys();
+			        Iterator it = keys.iterator();
+			        
+			        while (it.hasNext()) {
+			        	 
+			        	SelectionKey key = (SelectionKey)it.next();
+			        	if ((key.readyOps() & SelectionKey.OP_ACCEPT) ==
+			                    SelectionKey.OP_ACCEPT) {
+			        		Socket s = ss_con.accept();
+			        		SocketChannel sc = s.getChannel();
+			                sc.configureBlocking( false );
+			                sc.register( selector, SelectionKey.OP_READ );
+			        	}
+			        	else if ((key.readyOps() & SelectionKey.OP_READ) ==
+			                    SelectionKey.OP_READ) {
+
+			                    SocketChannel sc = null;
+
+			                    try {
+			                    	sc = (SocketChannel)key.channel();
+			                    	
+			                    	buffer.clear();
+			                        sc.read( buffer );
+			                        buffer.flip();
+			                        
+			                    }
+			                    catch (IOException e) {
+			                    	key.cancel();
+
+			                        try {
+			                          sc.close();
+			                        } catch( IOException ie2 ) { System.out.println( ie2 ); }
+			    				}
+			        	}
+			        }
+					tEnd = System.currentTimeMillis();
+					/*clientSocket = serverSocket.accept();
 					String message="temp message";
 					Socket socketid=null;
 					handler.receiveMessage(message,socketid);
-					System.out.println("Bidder connects to Auctioneer");
+					System.out.println("Bidder connects to Auctioneer");*/
+					
+					
+					
+					
+					
+					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -178,14 +261,18 @@ public class Auctioneer implements Runnable {
 			this.bidItem();
 			
 			//receive i am interested messages
-			while (time<L){
+			tEnd = System.currentTimeMillis();
+			tStart = System.currentTimeMillis();
+			
+			while ((tEnd-tStart)<L){
 				try {
-					clientSocket = serverSocket.accept();
+					/*clientSocket = serverSocket.accept();
 					String message="temp message";
 					Socket socketid=null;
 					handler.receiveMessage(message,socketid);
-					System.out.println("Bidder connects to Auctioneer and others send i_am_interested");
+					System.out.println("Bidder connects to Auctioneer and others send i_am_interested");*/
 					interested++;
+					tEnd = System.currentTimeMillis();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -197,16 +284,19 @@ public class Auctioneer implements Runnable {
 				
 				while (offer_is_on==1){
 					
+					tEnd = System.currentTimeMillis();
+					tStart = System.currentTimeMillis();
 				
-					while (time<L) {
+					while ((tEnd-tStart)<L) {
 					
 						String message="one of the bids";
 						Socket socketid=null;
 						int res=handler.receiveMessage(message, socketid);
 						if (res==2) {
-							time=0;
+							tStart = System.currentTimeMillis();
 							bidded++;
 						}
+						tEnd = System.currentTimeMillis();
 					}
 					
 					if (bidded==0){
