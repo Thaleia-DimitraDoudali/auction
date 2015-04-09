@@ -95,7 +95,7 @@ public class MessageServerHandler {
 			mtype = 3;
 			break;
 		default:
-			mtype = 4;
+			mtype = 10;
 			break;
 		}
 
