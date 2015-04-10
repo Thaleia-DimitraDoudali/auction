@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+
 import client.Bidder;
 
 //Message format = message's name + ' ' + rest;
@@ -37,7 +40,7 @@ public class MessageServerHandler {
 	}
 	
 	//Receive message
-	public int receiveMessage(String message, Socket socketId){
+	public int receiveMessage(SocketChannel client){
 		
 		//connect = 0
 		//i_am_interested = 1
@@ -50,14 +53,9 @@ public class MessageServerHandler {
 		//auction_complete = 8
 		//duplicate_name = 9
 		
-		try {
-			BufferedReader br = 
-					new BufferedReader(new InputStreamReader(socketId.getInputStream()));
-			String message = br.readLine();
-			System.out.println("Bidder said: " + readMessage);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		ByteBuffer buffer = ByteBuffer.allocate(256);
+		client.read(buffer);
+		String message = new String(buffer.array()).trim();
 		
 		char messageId = message.charAt(0);
 		String[] args;
@@ -103,13 +101,11 @@ public class MessageServerHandler {
 		
 	}
 	
-	public void sendMessage(String message, RegTableEntry entry) {
-		Socket socketId = entry.getSocketId();
+	public void sendMessage(String message, SocketChannel client) {
+		byte [] bmessage = new String(message).getBytes();
+		ByteBuffer buffer = ByteBuffer.wrap(bmessage);
 		try {
-			OutputStream os = socketId.getOutputStream();
-			PrintWriter pw = new PrintWriter(os, true);
-			pw.println(message);
-			pw.close();
+			client.write(buffer);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
