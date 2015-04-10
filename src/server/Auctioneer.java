@@ -1,9 +1,9 @@
 package server;
 import java.io.*;
 import java.net.*;
-import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
+
 import server.Item;
 import server.MessageServerHandler;
 
@@ -12,13 +12,8 @@ public class Auctioneer implements Runnable {
 	private List<Item> bidItems = new ArrayList<Item>();
 	private List<RegTableEntry> regTable = new ArrayList<RegTableEntry>();
 	private Item currentItem;
-	//For the bidders interested on the current item we can have either a list (replicated data) 
-	//or an integer "interested" field on regTable entry
 	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>(); //interested
-	//private int highestBid;
-	//private String highestBidder;
 	MessageServerHandler handler = new MessageServerHandler(this);
-	private final ByteBuffer buffer = ByteBuffer.allocate( 16384 );
 	
 	//Constructor
 	public Auctioneer(List<Item> bidItems){
@@ -42,7 +37,7 @@ public class Auctioneer implements Runnable {
 		this.currentItem = currentItem;
 	}
 	
-	//TODO
+	
 	public void addToRegTable(RegTableEntry entry) {
 		String temp = (entry.getBidder()).getBidderName();
 		int flag = 0;
@@ -58,12 +53,12 @@ public class Auctioneer implements Runnable {
 			regTable.add(entry);
 	}
 	
-	//TODO
+	
 	public void addToInterestedBidders(RegTableEntry entry) {
 		interestedBidders.add(entry);
 	}
 	
-	//TODO
+	
 	public void receiveBid(int amount, int itemId, RegTableEntry entry) {
 		if (itemId == currentItem.getItemId()) {
 			if (currentItem.getCurrentPrice() < amount) {
@@ -121,30 +116,25 @@ public class Auctioneer implements Runnable {
 		
 		//listens on 2 ports: 1 for bidders 1 for bids
 		//Server side socket
-		int bidderPort_con = 2223;
-		int bidderPort_dat = 2224;
-		ServerSocket ss_con = null;
-		ServerSocket ss_dat = null;
-		ServerSocketChannel ssc_con;
-		InetSocketAddress isa_con;
-		Selector selector = Selector.open();
-	    
+		int bidderPort = 2223;
+		ServerSocketChannel ssc=null;
+		InetSocketAddress isa;
+		Selector selector=null;
+	   
 		try {
-			ssc_con = ServerSocketChannel.open();
-			ssc_con.configureBlocking( false );
-			ss_con = ssc_con.socket();
-		    isa_con = new InetSocketAddress( bidderPort_con );
-		    ss_con.bind( isa_con );
-		    ssc_con.register( selector, SelectionKey.OP_ACCEPT ); 
+			selector= Selector.open();
+			ssc = ServerSocketChannel.open();
+			isa = new InetSocketAddress( bidderPort );
+			ssc.bind( isa );
+			ssc.configureBlocking( false );
+			int ops = ssc.validOps();
+			ssc.register(selector, ops, null);
 		} catch (IOException e) {
 			System.out.println("Couldn't listen on bidders port");
 		}
 		
 		
 		//Auction will end when all items sold etc.
-		boolean auctionIsUp = true;
-		
-		Socket clientSocket = null;
 		int L=1;
 		long tStart,tEnd;
 		tEnd = System.currentTimeMillis();
@@ -157,20 +147,24 @@ public class Auctioneer implements Runnable {
 				if (num == 0) {
 			          continue;
 			        }
-				Set keys = selector.selectedKeys();
-		        Iterator it = keys.iterator();
+				Set<SelectionKey> selectedKeys = selector.selectedKeys();
+				Iterator<SelectionKey> iter = selectedKeys.iterator();
 		        
-		        while (it.hasNext()) {
+		        while (iter.hasNext()) {
 		        	 
-		        	SelectionKey key = (SelectionKey)it.next();
-		        	if ((key.readyOps() & SelectionKey.OP_ACCEPT) ==
-		                    SelectionKey.OP_ACCEPT) {
-		        		Socket s = ss_con.accept();
-		        		SocketChannel sc = s.getChannel();
-		                sc.configureBlocking( false );
-		                sc.register( selector, SelectionKey.OP_READ );
-		        	}
+		        	SelectionKey key = (SelectionKey) iter.next();
+		        	 
+		        	if (key.isAcceptable()) {
+		        		 
+		        		// Accept the new client connection
+		        		SocketChannel client = ssc.accept();
+		        		client.configureBlocking(false);
+		        		 
+		        		// Add the new connection to the selector
+		        		client.register(selector, SelectionKey.OP_READ);
+		        		}
 		        }
+		        
 				tEnd = System.currentTimeMillis();
 				
 			} catch (IOException e) {
@@ -178,78 +172,16 @@ public class Auctioneer implements Runnable {
 			}
 		}
 		
-		int interested=1;
-		int bidded=1;
+		int interested=0;
+		int bidded=0;
 		int offer_is_on=1;
-		int counter=1;
+		int counter=0;
 		
 		
 		for (Item item : bidItems){
 			
-			//L time to connect
-			
-			tEnd = System.currentTimeMillis();
-			tStart = System.currentTimeMillis();
-			
-			while ((tEnd-tStart)<L){
-				try {
-					
-					int num = selector.select();
-					if (num == 0) {
-				          continue;
-				        }
-					Set keys = selector.selectedKeys();
-			        Iterator it = keys.iterator();
-			        
-			        while (it.hasNext()) {
-			        	 
-			        	SelectionKey key = (SelectionKey)it.next();
-			        	if ((key.readyOps() & SelectionKey.OP_ACCEPT) ==
-			                    SelectionKey.OP_ACCEPT) {
-			        		Socket s = ss_con.accept();
-			        		SocketChannel sc = s.getChannel();
-			                sc.configureBlocking( false );
-			                sc.register( selector, SelectionKey.OP_READ );
-			        	}
-			        	else if ((key.readyOps() & SelectionKey.OP_READ) ==
-			                    SelectionKey.OP_READ) {
-
-			                    SocketChannel sc = null;
-
-			                    try {
-			                    	sc = (SocketChannel)key.channel();
-			                    	
-			                    	buffer.clear();
-			                        sc.read( buffer );
-			                        buffer.flip();
-			                        
-			                    }
-			                    catch (IOException e) {
-			                    	key.cancel();
-
-			                        try {
-			                          sc.close();
-			                        } catch( IOException ie2 ) { System.out.println( ie2 ); }
-			    				}
-			        	}
-			        }
-					tEnd = System.currentTimeMillis();
-					/*clientSocket = serverSocket.accept();
-					String message="temp message";
-					Socket socketid=null;
-					handler.receiveMessage(message,socketid);
-					System.out.println("Bidder connects to Auctioneer");*/
-					
-					
-					
-					
-					
-					
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}//
-			
+			counter=0;
+			interested=0;
 			//set currentItem=item
 			currentItem.setItemId(item.getItemId());
 			currentItem.setInitialPrice(item.getInitialPrice());
@@ -260,23 +192,50 @@ public class Auctioneer implements Runnable {
 			//send start bidding to all
 			this.bidItem();
 			
-			//receive i am interested messages
+			//receive i am interested messages or new connections
 			tEnd = System.currentTimeMillis();
 			tStart = System.currentTimeMillis();
 			
 			while ((tEnd-tStart)<L){
+				
+				
 				try {
-					/*clientSocket = serverSocket.accept();
-					String message="temp message";
-					Socket socketid=null;
-					handler.receiveMessage(message,socketid);
-					System.out.println("Bidder connects to Auctioneer and others send i_am_interested");*/
-					interested++;
+					
+					int num = selector.select();
+					if (num == 0) {
+				          continue;
+				        }
+					Set<SelectionKey> selectedKeys = selector.selectedKeys();
+					Iterator<SelectionKey> iter = selectedKeys.iterator();
+			        
+			        while (iter.hasNext()) {
+			        	 
+			        	SelectionKey key = (SelectionKey) iter.next();
+			        	 
+			        	if (key.isAcceptable()) {
+			        		 
+			        		// Accept the new client connection
+			        		SocketChannel client = ssc.accept();
+			        		client.configureBlocking(false);
+			        		// Add the new connection to the selector
+			        		client.register(selector, SelectionKey.OP_READ);
+			        		}
+			        	else if (key.isReadable()) {
+			        			 
+			        		// Read the data from client 
+			        		SocketChannel client = (SocketChannel) key.channel();
+			        		int res=handler.receiveMessage(client);
+			        		if (res==1) interested++;
+			        		}
+			        }
+			        
 					tEnd = System.currentTimeMillis();
+					
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			}//
+			       
+			}
 			
 			if (interested>=2){
 				
@@ -287,17 +246,50 @@ public class Auctioneer implements Runnable {
 					tEnd = System.currentTimeMillis();
 					tStart = System.currentTimeMillis();
 				
-					while ((tEnd-tStart)<L) {
-					
-						String message="one of the bids";
-						Socket socketid=null;
-						int res=handler.receiveMessage(message, socketid);
-						if (res==2) {
-							tStart = System.currentTimeMillis();
-							bidded++;
+					//receive bids or new connections
+					while ((tEnd-tStart)<L){
+						
+						try {
+							
+							int num = selector.select();
+							if (num == 0) {
+						          continue;
+						        }
+							Set<SelectionKey> selectedKeys = selector.selectedKeys();
+							Iterator<SelectionKey> iter = selectedKeys.iterator();
+					        
+					        while (iter.hasNext()) {
+					        	 
+					        	SelectionKey key = (SelectionKey) iter.next();
+					        	 
+					        	if (key.isAcceptable()) {
+					        		 
+					        		// Accept the new client connection
+					        		SocketChannel client = ssc.accept();
+					        		client.configureBlocking(false);
+					        		// Add the new connection to the selector
+					        		client.register(selector, SelectionKey.OP_READ);
+					        		}
+					        	else if (key.isReadable()) {
+					        			 
+					        		// Read the data from client 
+					        		SocketChannel client = (SocketChannel) key.channel();
+					        		int res=handler.receiveMessage(client);
+					        		if (res==2) {
+					        			tStart = System.currentTimeMillis();
+					        			bidded++;
+					        		}
+					        		}
+					        }
+					        
+							tEnd = System.currentTimeMillis();
+							
+						} catch (IOException e) {
+							e.printStackTrace();
 						}
-						tEnd = System.currentTimeMillis();
+					       
 					}
+					
 					
 					if (bidded==0){
 						currentItem.setInitialPrice(0.9*currentItem.getInitialPrice());
@@ -326,3 +318,4 @@ public class Auctioneer implements Runnable {
 }
 			
 	
+
