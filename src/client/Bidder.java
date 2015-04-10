@@ -7,18 +7,15 @@ import java.util.List;
 import java.io.*;
 
 import server.Item;
-
+ 
 public class Bidder implements Runnable{
 	
-	//private int bidderId;
 	private String bidderName;
 	private Socket socketId;
 	private List<server.Item> itemsBought = new ArrayList<server.Item>();
 	
 	//Constructor
 	public Bidder(String bidderName, Socket socketId){
-		//maybe id won't be useful
-		//this.setBidderId(bidderId);
 		this.setBidderName(bidderName);
 		this.setSocket(socketId);
 	}
