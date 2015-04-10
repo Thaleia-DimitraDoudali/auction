@@ -47,7 +47,7 @@ public class Auctioneer implements Runnable {
 		for (RegTableEntry entry2 : regTable) {
 			if (temp.equals((entry2.getBidder()).getBidderName())) {
 				String message = "9 duplicate_name Please abort";
-				handler.sendMessage(message,entry);
+				handler.sendMessage(message,entry.getSocketChannel());
 				flag = 1;
 				break;
 			}
@@ -70,10 +70,7 @@ public class Auctioneer implements Runnable {
 			if (currentItem.getCurrentPrice() < amount) {
 				currentItem.setCurrentPrice(amount);
 				currentItem.setHighestBidderName((entry.getBidder()).getBidderName());
-				String message = "6 new_high_bid" + ' ' + currentItem.getCurrentPrice() + currentItem.getHighestBidderName();
-				for (RegTableEntry entry2 : interestedBidders) {
-					handler.sendMessage(message, entry2);
-				}
+				this.newHighBid();
 			}
 		}
 		//check if valid amount
@@ -85,33 +82,33 @@ public class Auctioneer implements Runnable {
 		//for all bidders in regtable send message bid_item
 		for (RegTableEntry entry : regTable) {
 			String message = "4 new_item" + ' ' + currentItem.getItemId() + ' ' + currentItem.getInitialPrice() + ' ' + currentItem.getDescription();
-			handler.sendMessage(message, entry);
+			handler.sendMessage(message, entry.getSocketChannel());
 		}
 		//handler.sendMessage("bid_item")
 	}
 	
 	public void startBidding() {
-		String message = "5 start_bidding" + ' ' + currentItem.getItemId() + ' ' + currentItem.getInitialPrice();
+		String message = "5 start_bidding" + ' ' + currentItem.getItemId();
 		for (RegTableEntry entry : interestedBidders)
-			handler.sendMessage(message, entry);
+			handler.sendMessage(message, entry.getSocketChannel());
 	}
 
 	public void newHighBid() {
 		String message = "6 new_high_bid" + ' ' + currentItem.getCurrentPrice() + ' ' + currentItem.getHighestBidderName() + ' ' + currentItem.getItemId();
 		for (RegTableEntry entry : interestedBidders)
-			handler.sendMessage(message, entry);
+			handler.sendMessage(message, entry.getSocketChannel());
 	}
 	
 	public void stopBidding() {
 		String message = "7 stop_bidding" + ' ' + currentItem.getCurrentPrice() + ' ' + currentItem.getHighestBidderName() + ' ' + currentItem.getItemId();
 		for (RegTableEntry entry : interestedBidders)
-			handler.sendMessage(message, entry);
+			handler.sendMessage(message, entry.getSocketChannel());
 	}
 	
 	public void auctionComplete() {
 		String message = "8 auction_complete";
 		for (RegTableEntry entry : regTable)
-			handler.sendMessage(message, entry);
+			handler.sendMessage(message, entry.getSocketChannel());
 	}
 	
 	

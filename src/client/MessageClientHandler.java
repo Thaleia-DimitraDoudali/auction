@@ -87,24 +87,12 @@ public class MessageClientHandler {
 	
 	//Compose and send a my_bid message to auctioneer
 	//!! confirmation that amount > price should be in Bidder, not in handler
-	public void sendBid(Item item, int amount) {
+	public void sendBid(Item item, double amount) {
 		String message = "2 my_bid" + ' ' + amount + ' ' + item.getItemId() + ' ' + bidder.getBidderName();
 		sendString(message);
 	}
 	
-	//TODO:
-	//???? Should be in bidder
-	public void sendListHighBid() {
-		
-	}
-	
-	//TODO:
-	//????? should be in bidder
-	public void sendListDescription() {
-		
-	}
-	
-	
+
 	public void sendQuit() {
 		String message = "3 quit" + ' ' + bidder.getBidderName();
 		sendString(message);
@@ -128,13 +116,19 @@ public class MessageClientHandler {
 		//auction_complete = 8
 		//duplicate_name = 9
 		
+		String message = null;
+		
 		try {
-			String message = reader.readLine();
+			message = reader.readLine();
 		} catch (SocketException e) {
+			return 10;
+		} catch (IOException e) {
 			return 10;
 		}
 		
-		if (message == null) return 10;
+		if (message == null) {
+			return 10;
+		}
 		
 		char messageId = message.charAt(0);
 		String[] args;
@@ -143,57 +137,56 @@ public class MessageClientHandler {
 		switch (messageId) {
 		case '4':
 			args = message.split("\\s+");
-			(bidder.getItem()).setItemId(args[2]);
-			(bidder.getItem()).setPrice(args[3]);
+			(bidder.getItem()).setItemId(Integer.parseInt(args[2]));
+			(bidder.getItem()).setCurrentPrice(Integer.parseInt(args[3]));
+			(bidder.getItem()).setInitialPrice(Integer.parseInt(args[3]));
 			String description = message.replace("4 new_item " + args[2] + ' ' + args[3] + ' ', "");
-			//print something in terminal???
-			//do something with description (which is the remaining strings in args)
+			(bidder.getItem()).setDescription(description);
 			mtype = 4;
 			break;
 		case '5':
-			args = message.split("\\s+");
+			//args = message.split("\\s+");
 			//should use args[2] to confirm itemId is the item.getItemId()
-			//initial price should be removed from message
 			mtype = 5;
 			break;
 		case '6':
 			args = message.split("\\s+");
-			(bidder.getItem()).setPrice(args[2]);
-			(bidder.getItem()).setHighestBidder(args[3]);
-			//print something in terminal???
+			(bidder.getItem()).setCurrentPrice(Integer.parseInt(args[2]));
+			(bidder.getItem()).setHighestBidderName(args[3]);
 			//should also do something with args[4] (itemId)
-			//PROBLEM -> how will bidder know if a 6 is received because there is a new highest bid or because of 10% down
-			//		and not think the auction has started in the latter case
-			//		should print something that tells which case it is
 			mtype = 6;
 			break;
 		case '7':
 			args = message.split("\\s+");
-			(bidder.getItem()).setPrice(args[2]);
-			(bidder.getItem()).setHighestBidder(arg[3]);
-			//print something in terminal???
+			(bidder.getItem()).setCurrentPrice(Integer.parseInt(args[2]));
+			(bidder.getItem()).setHighestBidderName(args[3]);
 			//should also do something with args[4] (itemId)
-			//inform bidders to stop bidding and check if they are the winners (if so add item to their list)
 			mtype = 7;
 			break;
 		case '8':
-			args = message.split("\\s+");
-			//inform bidders to shut down
 			mtype = 8;
-			reader.close();
+			try {
+				reader.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
 			writer.close();
 			break;
 		case '9':
-			args = message.split("\\s+");
-			//inform bidder to shut down or abort???
 			mtype = 9;
-			reader.close();
+			try {
+				reader.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 			writer.close();
 			break;
 		default:
 			mtype = 10;
 			break;
-
 		}
+		
+		return mtype;
+
 	}
 }

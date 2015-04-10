@@ -1,11 +1,6 @@
 package server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
@@ -14,22 +9,13 @@ import client.Bidder;
 //Message format = message's name + ' ' + rest;
 
 public class MessageServerHandler {
-	//private Socket socketId;
+
 	private Auctioneer auctioneer;
 	
 	//Constructor
 	public MessageServerHandler(Auctioneer auctioneer){
 		this.setAuctioneer(auctioneer);
 	}
-
-	//Getters - setters
-	//public Socket getSocketId() {
-	//	return socketId;
-	//}
-	
-	//public void setSocketId(Socket socketId) {
-	//	this.socketId = socketId;
-	//}
 	
 	public Auctioneer getAuctioneer() {
 		return auctioneer;
@@ -39,7 +25,7 @@ public class MessageServerHandler {
 		this.auctioneer = auctioneer;
 	}
 	
-	//Receive message
+	//Receive and decode message
 	public int receiveMessage(SocketChannel client){
 		
 		//connect = 0
@@ -54,7 +40,11 @@ public class MessageServerHandler {
 		//duplicate_name = 9
 		
 		ByteBuffer buffer = ByteBuffer.allocate(256);
-		client.read(buffer);
+		try {
+			client.read(buffer);
+		} catch (IOException e) {
+			return 10;
+		}
 		String message = new String(buffer.array()).trim();
 		
 		char messageId = message.charAt(0);
@@ -65,29 +55,29 @@ public class MessageServerHandler {
 		switch (messageId) {
 		case '0':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[2]);
-			RegTableEntry newEntry = new RegTableEntry(socketId, bidder); 
+			bidder = new Bidder(args[2],null);
+			RegTableEntry newEntry = new RegTableEntry(client, bidder); 
 			auctioneer.addToRegTable(newEntry);
 			mtype = 0;
 			break;
 		case '1':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[2]);
-			RegTableEntry newInterest = new RegTableEntry(socketId, bidder); 
+			bidder = new Bidder(args[3],null);
+			RegTableEntry newInterest = new RegTableEntry(client, bidder); 
 			auctioneer.addToInterestedBidders(newInterest);
 			mtype = 1;
 			break;
 		case '2':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[4]);
-			RegTableEntry tempEntry = new RegTableEntry(socketId, bidder);
+			bidder = new Bidder(args[4],null);
+			RegTableEntry tempEntry = new RegTableEntry(client, bidder);
 			auctioneer.receiveBid(Integer.parseInt(args[2]), Integer.parseInt(args[3]), tempEntry);
 			mtype = 2;
 			break;
 		case '3':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[2]);
-			RegTableEntry entry = new RegTableEntry(socketId, bidder); 
+			bidder = new Bidder(args[2],null);
+			RegTableEntry entry = new RegTableEntry(client, bidder); 
 			auctioneer.removeFromInterestedBidders(entry);
 			auctioneer.removeFromRegTable(entry);
 			mtype = 3;
