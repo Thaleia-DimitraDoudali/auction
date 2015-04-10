@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+
 import client.Bidder;
 
 //Message format = message's name + ' ' + rest;
@@ -37,7 +40,7 @@ public class MessageServerHandler {
 	}
 	
 	//Receive message
-	public int receiveMessage(String message, Socket socketId){
+	public int receiveMessage(SocketChannel client){
 		
 		//connect = 0
 		//i_am_interested = 1
@@ -50,9 +53,14 @@ public class MessageServerHandler {
 		//auction_complete = 8
 		//duplicate_name = 9
 		
+		ByteBuffer buffer = ByteBuffer.allocate(256);
+		client.read(buffer);
+		String message = new String(buffer.array()).trim();
+		
 		char messageId = message.charAt(0);
 		String[] args;
 		Bidder bidder;
+		int mtype;
 		
 		switch (messageId) {
 		case '0':
@@ -60,63 +68,44 @@ public class MessageServerHandler {
 			bidder = new Bidder(args[2]);
 			RegTableEntry newEntry = new RegTableEntry(socketId, bidder); 
 			auctioneer.addToRegTable(newEntry);
-			return 0;
+			mtype = 0;
+			break;
 		case '1':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[2]);
 			RegTableEntry newInterest = new RegTableEntry(socketId, bidder); 
 			auctioneer.addToInterestedBidders(newInterest);
-			return 1;
+			mtype = 1;
+			break;
 		case '2':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[4]);
 			RegTableEntry tempEntry = new RegTableEntry(socketId, bidder);
 			auctioneer.receiveBid(Integer.parseInt(args[2]), Integer.parseInt(args[3]), tempEntry);
-			return 2;
+			mtype = 2;
+			break;
 		case '3':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[2]);
 			RegTableEntry entry = new RegTableEntry(socketId, bidder); 
 			auctioneer.removeFromInterestedBidders(entry);
 			auctioneer.removeFromRegTable(entry);
-			return 3;
+			mtype = 3;
+			break;
 		default:
+			mtype = 10;
 			break;
 		}
+
+		return mtype;
 		
-		
-		
-		try {
-			BufferedReader br = 
-					new BufferedReader(new InputStreamReader(socketId.getInputStream()));
-			String readMessage = br.readLine();
-			System.out.println("Bidder said: " + readMessage);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		//According to what type of message auctioneer should act accordingly
-	
-		//tha stelnei kai mhnumata ston bider
-		
-		//if connect auctioneer.addToRegTable(RegTableEntry);
-		
-		//if interested auctioneer.addToCurrentBiders(RegTableEntry);
-		
-		//if my_bid auctioneer.receiveBid(amount, itemId);
-			//check price if higher than current price
-	
-		
-		//if quit close appropriate sockets
-		return 5;
 	}
 	
-	public void sendMessage(String message, RegTableEntry entry) {
-		Socket socketId = entry.getSocketId();
+	public void sendMessage(String message, SocketChannel client) {
+		byte [] bmessage = new String(message).getBytes();
+		ByteBuffer buffer = ByteBuffer.wrap(bmessage);
 		try {
-			OutputStream os = socketId.getOutputStream();
-			PrintWriter pw = new PrintWriter(os, true);
-			pw.println(message);
-			pw.close();
+			client.write(buffer);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
