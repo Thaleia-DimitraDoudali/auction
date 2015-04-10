@@ -182,6 +182,7 @@ public class Auctioneer implements Runnable {
 			
 			counter=0;
 			interested=0;
+			bidded=0;
 			//set currentItem=item
 			currentItem.setItemId(item.getItemId());
 			currentItem.setInitialPrice(item.getInitialPrice());
