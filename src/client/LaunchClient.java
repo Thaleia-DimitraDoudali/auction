@@ -41,3 +41,6 @@ public class LaunchClient {
 	}
 
 }
+
+//we decided to call Socket() in bidder and include port,hostname in bidder's constructor arguments
+
