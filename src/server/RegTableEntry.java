@@ -1,24 +1,23 @@
 package server;
-
-import java.net.Socket;
+import java.nio.channels.SocketChannel;
 
 public class RegTableEntry {
-	private Socket socketId;
+	private SocketChannel channel;
 	private client.Bidder bidder;
 	
 	//Constructor
-	public RegTableEntry(Socket socketId, client.Bidder bidder) {
-		this.setSocketId(socketId);
+	public RegTableEntry(SocketChannel channel, client.Bidder bidder) {
+		this.setSocketChannel(channel);
 		this.setBidder(bidder);
 	}
 
 	//Getters - setters
-	public Socket getSocketId() {
-		return socketId;
+	public SocketChannel getSocketChannel() {
+		return channel;
 	}
 
-	public void setSocketId(Socket socketId) {
-		this.socketId = socketId;
+	public void setSocketChannel(SocketChannel channel) {
+		this.channel= channel;
 	}
 
 	public client.Bidder getBidder() {

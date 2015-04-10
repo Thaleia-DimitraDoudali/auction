@@ -37,7 +37,10 @@ public class Auctioneer implements Runnable {
 		this.currentItem = currentItem;
 	}
 	
-	
+	public void removeFromRegTable(RegTableEntry entry) {
+ 		regTable.remove(entry);
+ 	}
+
 	public void addToRegTable(RegTableEntry entry) {
 		String temp = (entry.getBidder()).getBidderName();
 		int flag = 0;
@@ -53,6 +56,9 @@ public class Auctioneer implements Runnable {
 			regTable.add(entry);
 	}
 	
+	public void removeFromInterestedBidders(RegTableEntry entry) {
+		interestedBidders.remove(entry);
+	}
 	
 	public void addToInterestedBidders(RegTableEntry entry) {
 		interestedBidders.add(entry);
