@@ -1,0 +1,20 @@
+1. terminal -> sudo apt-get install mysql-server
+2. terminal -> sudo apt-get install mysql-client
+3. terminal -> sudo apt-get install libmysql-java
+4. eclipse -> project -> properties -> java build path -> libraries -> add external jars (select /usr/share/java/mysql.jar)
+5.  terminal -> mysql -u root -p (at prompt put your root password)
+	Because we put our root password we will change it, so that we all have the same
+	mysql> use mysql;
+	mysql> update user set password=PASSWORD("") where User='root';
+	mysql> flush privileges;
+	mysql> quit
+	terminal -> mysql -u root -p (now at prompt we put root as password)
+6. mysql> CREATE DATABASE auction;
+7. mysql> USE auction;
+8. mysql> CREATE TABLE items(
+	itemId INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+	initialPrice decimal(10,3),
+	currentPrice decimal(10,3),
+	description VARCHAR(200), 
+	highestBidderName VARCHAR(200));
+9. mysql> select * from items; (after running server.DBconnector.java, you can see what changed)
