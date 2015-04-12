@@ -2,57 +2,35 @@ package client;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.net.Socket;
-import java.net.SocketException;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
 
 import server.Item;
 
 //Message format = message's name + ' ' + rest;
 
 public class MessageClientHandler {
-	private Socket socketId;
+	private SocketChannel channel;
 	private Bidder bidder;
 	private PrintWriter writer;
 	private BufferedReader reader;
 	
 	//Constructor
-	public MessageClientHandler(Socket socketId, Bidder bidder) {
-		this.setSocketId(socketId);
+	public MessageClientHandler(SocketChannel channel, Bidder bidder) {
+		this.setSocketChannel(channel);
 		this.setBidder(bidder);
-		try {
-			(this.socketId).setSoTimeout(100);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-		
-		//set output buffer
-		try {
-			OutputStream os = (this.socketId).getOutputStream();
-			writer = new PrintWriter(os, true);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		//set input buffer
-		try {
-			reader = new BufferedReader(new InputStreamReader(socketId.getInputStream()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 	}
 	
 	
 
 	//Getters - setters
-	public Socket getSocketId() {
-		return socketId;
+	public SocketChannel getSocketChannel() {
+		return channel;
 	}
 
-	public void setSocketId(Socket socketId) {
-		this.socketId = socketId;
+	public void setSocketChannel(SocketChannel channel) {
+		this.channel = channel;
 	}
 	
 	public Bidder getBidder() {
@@ -63,9 +41,17 @@ public class MessageClientHandler {
 		this.bidder = bidder;
 	}
 	
+	
+	
 	//Send an already composed message
 	public void sendString(String message) {
-		writer.println(message);
+		byte [] bmessage = new String(message).getBytes();
+		ByteBuffer buffer = ByteBuffer.wrap(bmessage);
+		try {
+			channel.write(buffer);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -116,19 +102,15 @@ public class MessageClientHandler {
 		//auction_complete = 8
 		//duplicate_name = 9
 		
-		String message = null;
-		
+		ByteBuffer buffer = ByteBuffer.allocate(256);
 		try {
-			message = reader.readLine();
-		} catch (SocketException e) {
-			return 10;
+			channel.read(buffer);
 		} catch (IOException e) {
 			return 10;
 		}
-		
-		if (message == null) {
-			return 10;
-		}
+		String message = new String(buffer.array()).trim();
+		if (message.equals(null)) return 10;
+		if (message.equals("")) return 10;
 		
 		char messageId = message.charAt(0);
 		String[] args;
@@ -138,8 +120,8 @@ public class MessageClientHandler {
 		case '4':
 			args = message.split("\\s+");
 			(bidder.getItem()).setItemId(Integer.parseInt(args[2]));
-			(bidder.getItem()).setCurrentPrice(Integer.parseInt(args[3]));
-			(bidder.getItem()).setInitialPrice(Integer.parseInt(args[3]));
+			(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[3]));
+			(bidder.getItem()).setInitialPrice(Double.parseDouble(args[3]));
 			String description = message.replace("4 new_item " + args[2] + ' ' + args[3] + ' ', "");
 			(bidder.getItem()).setDescription(description);
 			mtype = 4;
@@ -151,14 +133,14 @@ public class MessageClientHandler {
 			break;
 		case '6':
 			args = message.split("\\s+");
-			(bidder.getItem()).setCurrentPrice(Integer.parseInt(args[2]));
+			(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
 			(bidder.getItem()).setHighestBidderName(args[3]);
 			//should also do something with args[4] (itemId)
 			mtype = 6;
 			break;
 		case '7':
 			args = message.split("\\s+");
-			(bidder.getItem()).setCurrentPrice(Integer.parseInt(args[2]));
+			(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
 			(bidder.getItem()).setHighestBidderName(args[3]);
 			//should also do something with args[4] (itemId)
 			mtype = 7;

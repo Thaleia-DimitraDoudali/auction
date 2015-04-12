@@ -46,6 +46,8 @@ public class MessageServerHandler {
 			return 10;
 		}
 		String message = new String(buffer.array()).trim();
+		if (message.equals(null)) return 10;
+		if (message.equals("")) return 10;
 		
 		char messageId = message.charAt(0);
 		String[] args;
@@ -55,28 +57,28 @@ public class MessageServerHandler {
 		switch (messageId) {
 		case '0':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[2],null);
+			bidder = new Bidder(args[2],0,null);
 			RegTableEntry newEntry = new RegTableEntry(client, bidder); 
 			auctioneer.addToRegTable(newEntry);
 			mtype = 0;
 			break;
 		case '1':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[3],null);
+			bidder = new Bidder(args[3],0,null);
 			RegTableEntry newInterest = new RegTableEntry(client, bidder); 
 			auctioneer.addToInterestedBidders(newInterest);
 			mtype = 1;
 			break;
 		case '2':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[4],null);
+			bidder = new Bidder(args[4],0,null);
 			RegTableEntry tempEntry = new RegTableEntry(client, bidder);
 			auctioneer.receiveBid(Integer.parseInt(args[2]), Integer.parseInt(args[3]), tempEntry);
 			mtype = 2;
 			break;
 		case '3':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[2],null);
+			bidder = new Bidder(args[2],0,null);
 			RegTableEntry entry = new RegTableEntry(client, bidder); 
 			auctioneer.removeFromInterestedBidders(entry);
 			auctioneer.removeFromRegTable(entry);

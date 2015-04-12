@@ -2,7 +2,6 @@ package client;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.net.UnknownHostException;
 //import java.io.BufferedReader;
 //import java.io.InputStreamReader;
@@ -24,18 +23,8 @@ public class LaunchClient {
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		}
-		
-		//Connect to the auctioneer (which one? for later)
-		Socket clientSocket = null;
-		try {
-			clientSocket = new Socket(hostname, bidderPort);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		//TODO: Read bidder's name from args. This can be implemented only via terminal
-				//The check for bidder's valid name is implemented in the auctioneer 
-		
-		Bidder bidder = new Bidder("thaleia",clientSocket);
+
+		Bidder bidder = new Bidder("thaleia",bidderPort,hostname);
 		(new Thread(bidder)).start();
 
 	}
