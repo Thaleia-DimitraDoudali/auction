@@ -18,6 +18,12 @@ public class Item {
 		this.setCurrentPrice(initialPrice);
 		this.setHighestBidderName("no_holder");				//bidder id = 0 means no one yet 
 	}
+	
+	public void print() {
+		System.out.println("Item no. " + itemId + " initialPrice = " + initialPrice + " currentPrice = "
+				+ currentPrice + " description = " + description + " highestBidderName = "
+						+ highestBidderName);
+	}
 
 	//Getters - setters
 	public int getItemId() {
