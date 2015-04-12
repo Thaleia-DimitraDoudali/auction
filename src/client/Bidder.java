@@ -26,14 +26,7 @@ public class Bidder implements Runnable {
 
 	Item item = new Item(0,0,"none_yet");
 	int flag = 0;
-	//Getters - setters
-	//public int getBidderId() {
-	//	return bidderId;
-	//}
 
-	//public void setBidderId(int bidderId) {
-	//	this.bidderId = bidderId;
-	//}
 	public Item getItem(){
 		return item;
 	}
@@ -90,7 +83,7 @@ public class Bidder implements Runnable {
 		int auction_is_on = 1;
 		int bidding_is_on = 0;
 		int id, id2=0;
-		double amount;
+		double amount = 0;
 		
 		while (auction_is_on == 1){
 			
@@ -99,24 +92,25 @@ public class Bidder implements Runnable {
 			
 			switch (id) {
 			case 9:
-					System.out.println("Error: Duplicate name. Please, try again using another name");
+					System.out.println("Error: Duplicate name. Please, try again using another name.");
 					return;
 			case 8:
-					System.out.println("The auction is completed. Thank you for participating");
+					System.out.println("The auction is completed. Thank you for participating!");
 					auction_is_on = 0;
 					break;
 			case 4:
 					System.out.println("New Item!");
 					//There has to be a change to the local item values
-					System.out.format("Initial Price: " + "%f" + " Description " + "%s %n", item.getInitialPrice(), item.getDescription());
-					System.out.println("Are you interested in it? If yes, type Y else N");
+					System.out.format(" Description: %s %n Initial price at $%.2f %n", item.getDescription(), item.getInitialPrice());
+					System.out.println("Are you interested in it? If yes, type Y, otherwise type N:");
 					
-					char c;
 					try {
-						c = (char) System.in.read();
-										
-						if (c == 'Y') {
-						//Send i am interested message
+						BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+						String s = null;
+						s = in.readLine();
+						//System.out.format("%s", s);				
+						if (s.charAt(0) == 'Y') {
+						//Send i_am_interested message
 							handler.sendInterested(item);
 					
 							System.out.println("sent I am Interested!");
@@ -129,55 +123,61 @@ public class Bidder implements Runnable {
 							System.out.println("received start bidding");
 					
 							if (id2 == 5) { 
-								System.out.println("You can now bid for the item. Type the word 'bid' an the amount you are willing to offer ");
+								System.out.println("You can now bid for the item! Type the word 'bid' and the amount you are willing to offer:");
 								bidding_is_on = 1;
 							}
 					
 											
 							while (bidding_is_on == 1){
-					
-								BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-								String s;
 					    
 								try {
-									while ((s = in.readLine()) != null && s.length() != 0) {
-										int length = s.length();
-										amount = Double.parseDouble(s.substring(4,length - 1));
-										handler.sendBid(item, amount);
+									if (in.ready()) {
+										s = in.readLine();
+										if (s.length()>0) {
+											System.out.format("Just read: %s %n",s);
+											amount = Double.parseDouble(s.substring(4,s.length()));
+											System.out.format("Sent amount: $%.2f %n",amount);
+											System.out.println("sending amount");
+											if (amount <= item.getCurrentPrice()) {
+												System.out.println("Your bid doesn't exceed the current value of the item and thus was not taken into consideration!");
+												System.out.println("Keep biding!");
+											}
+											handler.sendBid(item, amount);
+										}
 									}
 								} 
 								catch (IOException e) {
 									e.printStackTrace();
 								}
 						
-								id2 = 10;
-								while (id2 == 10) {
-									id2 = handler.receiveMessage();
-								}
-								System.out.format("Received Id2: %d %n",id2);
+								id2 = handler.receiveMessage();
+								
 								switch (id2) {
 								case 7:
-									System.out.println("You can no longer bid for this item.");
-									System.out.println("Please wait for the results of the auction");
+									//Bidding for this item stops (stop_bidding received)
+									System.out.println("You can no longer bid for this item!");
+									System.out.println("Please wait for the results of the auction...");
 									bidding_is_on = 0;
 									break;
 								case 6:
-									//i have received a new high bid message
+									//i have received a new_high_bid message
 									//the item must have changed
 									if ((item.getHighestBidderName()).equals(this.bidderName)) {
 										System.out.println("Your bid has been accepted for the item! Keep bidding!");
-								
 									}
 									else {
 										if ((item.getHighestBidderName()).equals("no_holder")){
-											System.out.format("The item has now a new reduced value: " + "%f %n", item.getCurrentPrice());
+											System.out.format("The item has now a new reduced value: " + "$%.2f %n", item.getCurrentPrice());
 											System.out.println("Start bidding now!");
 										}
 										else {
-											System.out.format("The current highest bid is " + "%f" + " and belongs to " + "%s", item.getCurrentPrice(), item.getHighestBidderName() );
+											System.out.format("The current highest bid is " + "$%.2f" + " and belongs to " + "%s!", item.getCurrentPrice(), item.getHighestBidderName() );
 											System.out.println("Keep bidding!");
 										}
 									}
+									break;
+								default:
+									break;
 								}
 							}
 							//When bidding stops i must check if I have bought the item
@@ -188,16 +188,16 @@ public class Bidder implements Runnable {
 							}
 							else {
 								if ((item.getHighestBidderName()).equals("no_holder")) {
-								System.out.println("Nobody bid for this item. Proceeding to the next item.");
+								System.out.println("Nobody bid for this item. Proceeding to the next item...");
 								}
 								else {
-									System.out.format("The item was granted to " + "%s" + " who offered " + "%f %n", item.getHighestBidderName(), item.getCurrentPrice());
+									System.out.format("The item was granted to " + "%s" + " who offered " + "$%.2f %n", item.getHighestBidderName(), item.getCurrentPrice());
 								}
 							}
 						}
-						else {
-							System.out.println("You will be informed about the next item soon");
-						}	
+						
+						System.out.println("You will be informed about the next item soon...");
+							
 					} catch (IOException e1) {
 						e1.printStackTrace();
 					}

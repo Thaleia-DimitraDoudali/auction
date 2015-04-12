@@ -21,7 +21,7 @@ public class Auctioneer implements Runnable {
 	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>(); //interested
 	MessageServerHandler handler = new MessageServerHandler(this);
 	
-	
+	//Timer that unblocks selector.select()
 	class WakeUp extends TimerTask {
 	    public void run() {
 	      System.out.println("Timer to the rescue!");
@@ -84,7 +84,7 @@ public class Auctioneer implements Runnable {
 	}
 	
 	
-	public void receiveBid(int amount, int itemId, RegTableEntry entry) {
+	public void receiveBid(double amount, int itemId, RegTableEntry entry) {
 		if (itemId == currentItem.getItemId()) {
 			if (currentItem.getCurrentPrice() < amount) {
 				currentItem.setCurrentPrice(amount);
@@ -181,12 +181,11 @@ public class Auctioneer implements Runnable {
 
 		timer.schedule(new WakeUp(), L*1000);
 		
-		while ((tEnd-tStart)/1000<L/2){
+		while ((tEnd-tStart)/1000<L){
 			
 			try {
 				
-				int num = selector.select();
-				//if (num != 0) {
+				selector.select();
 			         
 				Set<SelectionKey> selectedKeys = selector.selectedKeys();
 				Iterator<SelectionKey> iter = selectedKeys.iterator();
@@ -208,17 +207,15 @@ public class Auctioneer implements Runnable {
 		        	else if (key.isReadable()) {
 	        			 
 		        		// Read the data from client
-		        		System.out.println("entered readable!");
+		        		//System.out.println("entered readable!");
 		        		SocketChannel client = (SocketChannel) key.channel();
 		        		int res=handler.receiveMessage(client);
 		        		if (res != 10) System.out.format("Received Id: %d %n",res);
 		        		if (res==0) System.out.println("entered client!");
 		        		}
 			        iter.remove();
-		        //}
 				}
 		        //System.out.println("reached selection!");
-				
 				
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -255,12 +252,13 @@ public class Auctioneer implements Runnable {
 			tEnd = System.currentTimeMillis();
 			tStart = System.currentTimeMillis();
 			
+			timer.schedule(new WakeUp(), L*1000);
+			
 			while ((tEnd-tStart)/1000<L){
 				
-				tEnd = System.currentTimeMillis();
 				try {
 					
-					int num = selector.select();
+					selector.select();
 
 					Set<SelectionKey> selectedKeys = selector.selectedKeys();
 					Iterator<SelectionKey> iter = selectedKeys.iterator();
@@ -293,24 +291,33 @@ public class Auctioneer implements Runnable {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			       
+
+				tEnd = System.currentTimeMillis();
+				
 			}
+			
 			System.out.println("after I am interested!");
+			
+			//if at least two bidders are interested
 			if (interested>=1){
 				
+				//begin the auction for the curent item
 				this.startBidding();
 				System.out.println("start bidding was sent!");
+				offer_is_on = 1;
+				
 				while (offer_is_on==1){
 					
 					tEnd = System.currentTimeMillis();
 					tStart = System.currentTimeMillis();
 				
+					timer.schedule(new WakeUp(), L*1000);
+					
 					//receive bids or new connections
 					while ((tEnd-tStart)/1000<L){
-						tEnd = System.currentTimeMillis();
 						try {
 							
-							int num = selector.select();
+							selector.select();
 							
 							Set<SelectionKey> selectedKeys = selector.selectedKeys();
 							Iterator<SelectionKey> iter = selectedKeys.iterator();
@@ -334,22 +341,27 @@ public class Auctioneer implements Runnable {
 					        		int res=handler.receiveMessage(client);
 					        		if (res==2) {
 					        			tStart = System.currentTimeMillis();
-					        			bidded++;
+					        			timer.cancel();
+					        			timer.purge();
+					        			timer = new Timer();
+					        			timer.schedule(new WakeUp(), L*1000);
 					        		}
 					        		}
 						        iter.remove();
 					        }
-
-							
-							
+					        
 						} catch (IOException e) {
 							e.printStackTrace();
 						}
+						
+						tEnd = System.currentTimeMillis();
 					       
 					}
+					
 					System.out.println("after bids were done!");
 					
-					if (bidded==0){
+					//check if nobody has bid for the current item
+					if ((currentItem.getHighestBidderName()).equals("no_holder")){
 						currentItem.setCurrentPrice(0.9*currentItem.getCurrentPrice());
 						counter++;
 						if (counter>=6){
@@ -364,6 +376,7 @@ public class Auctioneer implements Runnable {
 							
 					}
 					else {
+						//if a successful bid was placed, stop the bidding process and sell the item
 						this.stopBidding();
 						offer_is_on=0;
 						System.out.println("item sold! ");
@@ -371,12 +384,28 @@ public class Auctioneer implements Runnable {
 				}
 			}
 				
+			//wait for system to stabilize before sending new item
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			
 		}
 		System.out.println("reached auction!");
+		
+		//wait for system to stabilize before sending new message
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		//terminate auction
+		System.out.println("reached auction2!");
 		this.auctionComplete();
 		System.out.println("after auction!");
-		
+		timer.cancel();
 	}
 
 }

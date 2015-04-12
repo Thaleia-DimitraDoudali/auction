@@ -1,8 +1,6 @@
 package client;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 
@@ -13,8 +11,6 @@ import server.Item;
 public class MessageClientHandler {
 	private SocketChannel channel;
 	private Bidder bidder;
-	private PrintWriter writer;
-	private BufferedReader reader;
 	
 	//Constructor
 	public MessageClientHandler(SocketChannel channel, Bidder bidder) {
@@ -116,6 +112,8 @@ public class MessageClientHandler {
 		String[] args;
 		int mtype;
 		
+		System.out.format("Received messageId: %s %n",message);
+		
 		switch (messageId) {
 		case '4':
 			args = message.split("\\s+");
@@ -147,21 +145,9 @@ public class MessageClientHandler {
 			break;
 		case '8':
 			mtype = 8;
-			try {
-				reader.close();
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
-			writer.close();
 			break;
 		case '9':
 			mtype = 9;
-			try {
-				reader.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-			writer.close();
 			break;
 		default:
 			mtype = 10;

@@ -1,8 +1,8 @@
 1.launchserver: thaleia 
 2.launchclient : change bidder,put Socket() in Bidder,read from file
 3.auctioneer: quit
-4.bidder: change channel,constructor,listhighbid,listdescription,check valid bid,quit command,terminal
-5.clienthandler:channel
-6.serverhandler:when bidder constructor changes,change it here too
+4.bidder: (change channel),(constructor),listhighbid,listdescription,(check valid bid),quit command,terminal
+5.clienthandler: (channel)
+6.serverhandler:(when bidder constructor changes, change it here too)
 7.regtable:done
 8.item:done

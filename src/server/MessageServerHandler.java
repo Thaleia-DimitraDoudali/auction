@@ -54,6 +54,8 @@ public class MessageServerHandler {
 		Bidder bidder;
 		int mtype;
 		
+		System.out.format("Received messageId: %s %n",message);
+		
 		switch (messageId) {
 		case '0':
 			args = message.split("\\s+");
@@ -73,7 +75,7 @@ public class MessageServerHandler {
 			args = message.split("\\s+");
 			bidder = new Bidder(args[4],0,null);
 			RegTableEntry tempEntry = new RegTableEntry(client, bidder);
-			auctioneer.receiveBid(Integer.parseInt(args[2]), Integer.parseInt(args[3]), tempEntry);
+			auctioneer.receiveBid(Double.parseDouble(args[2]), Integer.parseInt(args[3]), tempEntry);
 			mtype = 2;
 			break;
 		case '3':
