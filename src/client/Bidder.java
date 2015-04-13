@@ -63,6 +63,38 @@ public class Bidder implements Runnable {
 		return this.hostname;
 	}
 	
+	public boolean decodeTerminal(String s, MessageClientHandler handler) {
+		if (s.equals("list_high_bid")) {
+			System.out.format(" Current highest bid is $%.2f by %s %n", item.getCurrentPrice(), item.getHighestBidderName());
+			return false;
+		}
+		if (s.equals("list_description")) {
+			System.out.format(" Current item description: %n  %s", item.getDescription());
+			return false;
+		}
+		if (s.equals("quit")) {
+			System.out.println("You have left the auction room. Thank you for participating!");
+			handler.sendQuit();
+			return true;
+		}
+		String[] args = s.split("\\s+");
+		if ((args[0].equals("bid")) && (args.length == 2)) {
+			try {
+				double amount = Double.parseDouble(args[1]);
+				if (amount <= item.getCurrentPrice()) {
+					System.out.println("Your bid doesn't exceed the current value of the item and thus was not taken into consideration!");
+					System.out.println("Keep biding!");
+				}
+				else
+					handler.sendBid(item, amount);
+				return false;
+			}
+			catch (NumberFormatException e) {			}
+		}
+		System.out.println("Please use the command format. \n Valid commands are \"list_high_bid\", \"list_description\", \"bid <amount>\", \"quit\"");
+		return false;
+	}
+	
 	
 	public void run() {
 		
@@ -134,15 +166,8 @@ public class Bidder implements Runnable {
 									if (in.ready()) {
 										s = in.readLine();
 										if (s.length()>0) {
-											System.out.format("Just read: %s %n",s);
-											amount = Double.parseDouble(s.substring(4,s.length()));
-											System.out.format("Sent amount: $%.2f %n",amount);
-											System.out.println("sending amount");
-											if (amount <= item.getCurrentPrice()) {
-												System.out.println("Your bid doesn't exceed the current value of the item and thus was not taken into consideration!");
-												System.out.println("Keep biding!");
-											}
-											handler.sendBid(item, amount);
+											if (decodeTerminal(s,handler))
+												return;
 										}
 									}
 								} 

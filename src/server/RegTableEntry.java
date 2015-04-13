@@ -27,4 +27,13 @@ public class RegTableEntry {
 	public void setBidder(client.Bidder bidder) {
 		this.bidder = bidder;
 	}
+	
+	//override to permit use of entry.remove() function
+	@Override
+	public boolean equals(Object obj) {
+		RegTableEntry entry = (RegTableEntry) obj;
+		if (((this.bidder).getBidderName()).equals((entry.getBidder()).getBidderName()))
+			return true;
+		else return false;
+	}
 }

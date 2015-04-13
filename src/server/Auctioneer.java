@@ -12,7 +12,7 @@ import java.util.TimerTask;
 
 public class Auctioneer implements Runnable {
 
-	
+	private int L;
 	private Timer timer;
 	private Selector selector;
 	private List<Item> bidItems;
@@ -26,15 +26,14 @@ public class Auctioneer implements Runnable {
 	    public void run() {
 	      System.out.println("Timer to the rescue!");
 	      selector.wakeup();
-	      //timer.cancel(); //Not necessary because we call System.exit
 	    }
 	  }
 
 	
 	//Constructor
-	public Auctioneer(List<Item> bidItems){
+	public Auctioneer(int L, List<Item> bidItems){
 		this.setBidItems(bidItems);
-		this.bidItems = new ArrayList<Item>();
+		this.L = L;
 		this.currentItem = new Item(50,50,"nkdsn");
 		this.timer = new Timer();
 	}
@@ -57,7 +56,13 @@ public class Auctioneer implements Runnable {
 	}
 	
 	public void removeFromRegTable(RegTableEntry entry) {
- 		regTable.remove(entry);
+		try {
+			entry.getSocketChannel().close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+ 		if (regTable.remove(entry))
+ 			System.out.println("Entry removed");
  	}
 
 	public void addToRegTable(RegTableEntry entry) {
@@ -103,7 +108,6 @@ public class Auctioneer implements Runnable {
 			String message = "4 new_item" + ' ' + currentItem.getItemId() + ' ' + currentItem.getInitialPrice() + ' ' + currentItem.getDescription();
 			handler.sendMessage(message, entry.getSocketChannel());
 		}
-		//handler.sendMessage("bid_item")
 	}
 	
 	public void startBidding() {
@@ -139,12 +143,6 @@ public class Auctioneer implements Runnable {
 		//listens on 2 ports: 1 for bidders 1 for bids
 		//Server side socket
 		
-		//temporary item list
-		Item tempo = new Item(1,100,"none_yet");
-		bidItems.add(tempo);
-		tempo = new Item(2,244,"non_yet");
-		bidItems.add(tempo);
-		
 		
 		//set up connection
 		int bidderPort = 2223;
@@ -174,7 +172,6 @@ public class Auctioneer implements Runnable {
 		
 		
 		//Loop constantly waiting for bidders to connect		
-		int L=10;
 		long tStart,tEnd;
 		tEnd = System.currentTimeMillis();
 		tStart = System.currentTimeMillis();
@@ -235,8 +232,8 @@ public class Auctioneer implements Runnable {
 			System.out.println("item1");
 			counter=0;
 			interested=0;
+			interestedBidders.clear();
 			bidded=0;
-			//set currentItem=item
 			currentItem.setItemId(item.getItemId());
 			currentItem.setInitialPrice(item.getInitialPrice());
 			currentItem.setDescription(item.getDescription());
@@ -301,7 +298,7 @@ public class Auctioneer implements Runnable {
 			//if at least two bidders are interested
 			if (interested>=1){
 				
-				//begin the auction for the curent item
+				//begin the auction for the current item
 				this.startBidding();
 				System.out.println("start bidding was sent!");
 				offer_is_on = 1;
