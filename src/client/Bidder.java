@@ -67,7 +67,7 @@ public class Bidder implements Runnable {
 	//prints on terminal the items this bidders has bought (the elements of itemsBought)
 	public void printItemsBought() {
 		
-		System.out.println("The items you have bought are:");
+		System.out.println("The items you bought are:");
 		int i = 1;
 		if (itemsBought.size()==0) {
 			System.out.println(" None");
@@ -86,6 +86,10 @@ public class Bidder implements Runnable {
 	public void quitFunction() {
 		//waits until either the current item is sold or a higher bid is placed
 		if (this.bidderName.equals(this.item.getHighestBidderName())) {
+			System.out.println("You have placed the highest bid on this item!\nAlthough you are leaving, if you win, your bid will still be charged!");
+			item.setDescription("(Probable) " + item.getDescription());
+			itemsBought.add(item);
+			/*
 			System.out.println("You have placed the highest bid on this item.\nPlease wait until either a higher bid is placed or you get the item...");
 			int id = 10;
 			while (id == 10)
@@ -96,9 +100,10 @@ public class Bidder implements Runnable {
 			if (id == 7) {
 				System.out.println("The item is yours!");
 			}
+			*/
 		}
 		//leave auction
-		System.out.print("You have left the auction room! ");
+		System.out.print("\nYou have left the auction room! ");
 		handler.sendQuit();
 		printItemsBought();
 		System.out.println("Thank you for participating!");
@@ -138,32 +143,37 @@ public class Bidder implements Runnable {
 	}
 
 	
+	public String nonBlockingRead(BufferedReader in) {
+		String s = "";
+		try {
+			if (in.ready())
+				s = in.readLine();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return s;
+	}
+	
 	//executes bidding sequence for one item
 	public boolean biddingFunction(BufferedReader in) {
 	
 		String s;
 		int bidding_is_on = 1;
 		while (bidding_is_on == 1){
-	    
-			try {
-				if (in.ready()) {
-					s = in.readLine();
-					if (s.length()>0) {
-						if (decodeTerminal(s))
-							return true;
-					}
-				}
-			} 
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+			
+			s = nonBlockingRead(in);
+			if (s.length() > 0)
+				if (decodeTerminal(s))
+					return true;
 			
 			int id = handler.receiveMessage();
 			
 			switch (id) {
 			case 7:
 				//Bidding for this item stops (stop_bidding received)
-				System.out.println("You can no longer bid for this item!");
+				System.out.println("\nYou can no longer bid for this item!");
 				System.out.println("Please wait for the results of the auction...");
 				bidding_is_on = 0;
 				break;
@@ -183,6 +193,10 @@ public class Bidder implements Runnable {
 						System.out.print("Keep bidding!\n>> ");
 					}
 				}
+				break;
+			case 11:
+				System.out.println("Communication error with server...  You will be informed about the next item soon...");
+				bidding_is_on = 0;
 				break;
 			default:
 				break;
@@ -210,18 +224,24 @@ public class Bidder implements Runnable {
 		System.out.println("You have entered the auction room!");
 		
 		int auction_is_on = 1;
-		int id, id2=0;
+		int id, id2 = 0;
 		double amount = 0;
 		
 		while (auction_is_on == 1){
-			if (channel.isOpen())
-				id = handler.receiveMessage();
-			else
-				id = 8;
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+			String s = nonBlockingRead(in);
+			if (s.equals("quit")) {
+				item.setHighestBidderName("_unknown");
+				quitFunction();
+				return;
+			}
+			
+			id = handler.receiveMessage();
 			
 			switch (id) {
 			case 9:
-					System.out.println("\nError: Your bidder name is already taken. \nThaleiaPlease, try again using another name.");
+					System.out.println("\nError: Your bidder name is already taken. \nPlease, try again using another name.");
 					return;
 			case 8:
 					System.out.print("\nThe auction is completed! ");
@@ -230,40 +250,51 @@ public class Bidder implements Runnable {
 					auction_is_on = 0;
 					break;
 			case 4:
+				int nextItem = 1;
+				while (nextItem == 1)
+				{
+					nextItem = 0;
 					System.out.println("\nNew Item!");
 					//There has to be a change to the local item values
 					System.out.format(" Description: %s %n Initial price at $%.2f %n", item.getDescription(), item.getInitialPrice());
 					System.out.print("Are you interested in it? If yes, type Y, otherwise type N:\n>> ");
 					
-					try {
-						BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-						String s = null;
-						s = in.readLine();
+					while (true) {
+						s = nonBlockingRead(in);
 						id2 = handler.receiveMessage();
 						if (s.equals("quit")) {
 							quitFunction();
 							return;
 						}
-						if ((id2 != 10) && (s.charAt(0) == 'Y')) {
-							System.out.println("The auction has already began.\nYou will be informed about the next item soon...");
+						if (id2 == 4)
+							nextItem = 1;
+						if (id2 != 10) {
+							System.out.println("\nThe auction has already began.\nYou will be informed about the next item soon...");
 							break;
 						}
-						if (s.charAt(0) == 'Y') {							
+						if (s.equals("N")) {
+							System.out.println("You will be informed about the next item soon...");
+							break;
+						}
+						if (s.equals("Y")) {							
 						//Send i_am_interested message
 							handler.sendInterested(item);
 							//System.out.println("sent I am Interested!");
 							//receive the start_bidding message
 							id2 = 10;
-							while (id2!=5) {
+							while ((id2!=5) && (id2!=11)) {
 								id2 = handler.receiveMessage();
 							}
 							//System.out.format("Received Id2: %d %n",id2);
 					
-							if (id2 == 5) { 
-								System.out.print("You can now bid for the item! Type the word 'bid' and the amount you are willing to offer:\n>> ");
-								if (biddingFunction(in)) return;
+							if (id2 == 11) {
+								System.out.println("Server communication error... You will be informed about the next item soon...");
+								break;
 							}
-
+							
+							System.out.print("You can now bid for the item! Type the word 'bid' and the amount you are willing to offer:\n>> ");
+							if (biddingFunction(in)) return;
+							
 							//When bidding stops i must check if I have bought the item
 							if ((item.getHighestBidderName()).equals(this.bidderName)) {
 								System.out.println("Congratulations! The item is now yours!");
@@ -272,19 +303,20 @@ public class Bidder implements Runnable {
 							}
 							else {
 								if ((item.getHighestBidderName()).equals("no_holder")) {
-								System.out.println("Nobody bid for this item. Proceeding to the next item...");
+									System.out.println("Nobody bid for this item. Proceeding to the next item...");
 								}
-								else {
+								else if (!((item.getHighestBidderName()).equals("_unknown"))) {
 									System.out.format("The item was granted to " + "%s" + " who offered " + "$%.2f %n", item.getHighestBidderName(), item.getCurrentPrice());
+									
 								}
 							}
+							break;
 						}
-						
-						System.out.println("You will be informed about the next item soon...");
-							
-					} catch (IOException e1) {
-						e1.printStackTrace();
+						if (s.length() > 0) {
+							System.out.print("Please use current command format.\n Valid commands are \"Y\", \"N\" and \"quit\"\n>> ");
+						}
 					}
+				}
 			default:
 				break;
 				

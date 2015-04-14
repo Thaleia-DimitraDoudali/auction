@@ -126,22 +126,36 @@ public class MessageClientHandler {
 			break;
 		case '5':
 			args = message.split("\\s+");
-			//should use args[2] to confirm itemId is the item.getItemId()
-			mtype = 5;
+			if (bidder.getItem().getItemId() != Integer.parseInt(args[2])) {
+				(bidder.getItem()).setHighestBidderName("_unknown");
+				mtype = 11;
+			}
+			else
+				mtype = 5;
 			break;
 		case '6':
 			args = message.split("\\s+");
-			(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
-			(bidder.getItem()).setHighestBidderName(args[3]);
-			//should also do something with args[4] (itemId)
-			mtype = 6;
+			if (bidder.getItem().getItemId() != Integer.parseInt(args[4])) {
+				(bidder.getItem()).setHighestBidderName("_unknown");
+				mtype = 11;
+			}
+			else {
+				(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
+				(bidder.getItem()).setHighestBidderName(args[3]);
+				mtype = 6;
+			}
 			break;
 		case '7':
 			args = message.split("\\s+");
-			(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
-			(bidder.getItem()).setHighestBidderName(args[3]);
-			//should also do something with args[4] (itemId)
-			mtype = 7;
+			if (bidder.getItem().getItemId() != Integer.parseInt(args[4])) {
+				(bidder.getItem()).setHighestBidderName("_unknown");
+				mtype = 11;
+			}
+			else {
+				(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
+				(bidder.getItem()).setHighestBidderName(args[3]);
+				mtype = 7;
+			}
 			break;
 		case '8':
 			mtype = 8;
