@@ -24,7 +24,7 @@ public class Auctioneer implements Runnable {
 	//Timer that unblocks selector.select()
 	class WakeUp extends TimerTask {
 	    public void run() {
-	      System.out.println("Timer to the rescue!");
+	      //System.out.println("Timer to the rescue!");
 	      selector.wakeup();
 	    }
 	  }
@@ -89,17 +89,16 @@ public class Auctioneer implements Runnable {
 	}
 	
 	
-	public void receiveBid(double amount, int itemId, RegTableEntry entry) {
-		if (itemId == currentItem.getItemId()) {
+	public int receiveBid(double amount, int itemId, RegTableEntry entry) {
+		if ((itemId == currentItem.getItemId()) && (interestedBidders.contains(entry))) {
 			if (currentItem.getCurrentPrice() < amount) {
 				currentItem.setCurrentPrice(amount);
 				currentItem.setHighestBidderName((entry.getBidder()).getBidderName());
 				this.newHighBid();
+				return 2;
 			}
 		}
-		//check if valid amount
-		//change item's current price, highest bidder
-		//If many auctioneers synchronize!!
+		return 10;
 	}
 	
 	public void bidItem() {
@@ -132,6 +131,17 @@ public class Auctioneer implements Runnable {
 		String message = "8 auction_complete";
 		for (RegTableEntry entry : regTable)
 			handler.sendMessage(message, entry.getSocketChannel());
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		for (RegTableEntry entry : regTable)
+			try {
+				(entry.getSocketChannel()).close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 	}
 	
 	
@@ -142,8 +152,7 @@ public class Auctioneer implements Runnable {
 		
 		//listens on 2 ports: 1 for bidders 1 for bids
 		//Server side socket
-		
-		
+				
 		//set up connection
 		int bidderPort = 2223;
 		ServerSocketChannel ssc = null;
@@ -161,63 +170,68 @@ public class Auctioneer implements Runnable {
 			selector= Selector.open();
 			ssc = ServerSocketChannel.open();
 			isa = new InetSocketAddress(hostname, bidderPort);
-			System.out.println("successful connection!");
+			System.out.println("Successful connection!");
 			ssc.bind( isa );
 			ssc.configureBlocking( false );
 			int ops = ssc.validOps();
 			ssc.register(selector, ops, null);
 		} catch (IOException e) {
-			System.out.println("Couldn't listen on bidders port");
+			System.out.println("Couldn't listen on bidders port! Server must be reset!");
 		}
 		
 		
-		//Loop constantly waiting for bidders to connect		
-		long tStart,tEnd;
-		tEnd = System.currentTimeMillis();
+		//Loop constantly waiting for at least one bidder to connect		
+		long tStart,tMid,tEnd=0;
 		tStart = System.currentTimeMillis();
-
-		timer.schedule(new WakeUp(), L*1000);
 		
-		while ((tEnd-tStart)/1000<L){
-			
-			try {
-				
-				selector.select();
-			         
-				Set<SelectionKey> selectedKeys = selector.selectedKeys();
-				Iterator<SelectionKey> iter = selectedKeys.iterator();
-		        
-					while (iter.hasNext()) {
-		        	 
-		        	SelectionKey key = (SelectionKey) iter.next();
-		        	 
-		        	if (key.isAcceptable()) {
-		        		 
-		        		// Accept the new client connection
-		        		SocketChannel client = ssc.accept();
-		        		client.configureBlocking(false);
-		        		
-		        		// Add the new connection to the selector
-		        		client.register(selector, SelectionKey.OP_READ);
-		        		System.out.println("successful accept!");
-		        		}
-		        	else if (key.isReadable()) {
-	        			 
-		        		// Read the data from client
-		        		//System.out.println("entered readable!");
-		        		SocketChannel client = (SocketChannel) key.channel();
-		        		int res=handler.receiveMessage(client);
-		        		if (res != 10) System.out.format("Received Id: %d %n",res);
-		        		if (res==0) System.out.println("entered client!");
-		        		}
-			        iter.remove();
-				}
-		        //System.out.println("reached selection!");
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+		while (this.regTable.size() < 1) {
+
 			tEnd = System.currentTimeMillis();
+			tMid = System.currentTimeMillis();
+			
+			if ((tEnd-tStart)/1000 > 3*L) {
+				System.out.println("No bidders, auction was aborted");
+				timer.cancel();
+				return;
+			}
+			
+			timer.schedule(new WakeUp(), L*1000);
+		
+			while ((tEnd-tMid)/1000<L){
+			
+				try {
+				
+					selector.select();
+			         
+					Set<SelectionKey> selectedKeys = selector.selectedKeys();
+					Iterator<SelectionKey> iter = selectedKeys.iterator();
+		        
+						while (iter.hasNext()) {
+		        	 
+							SelectionKey key = (SelectionKey) iter.next();
+		        	 
+							if (key.isAcceptable()) {
+		        		 
+								//Accept the new client connection
+								SocketChannel client = ssc.accept();
+								client.configureBlocking(false);
+								//Add the new connection to the selector
+								client.register(selector, SelectionKey.OP_READ);
+							}
+							else if (key.isReadable()) {
+	        			 
+								//Read the data from client
+								SocketChannel client = (SocketChannel) key.channel();
+								handler.receiveMessage(client);
+							}
+							iter.remove();
+						}
+				
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				tEnd = System.currentTimeMillis();
+			}
 		}
 		
 		int interested=0;
@@ -225,11 +239,10 @@ public class Auctioneer implements Runnable {
 		int offer_is_on=1;
 		int counter=0;
 		
-		System.out.println("reached list!");
+		//System.out.println("reached list!");
 		
 		//Auction will end when all items sold etc.
 		for (Item item : bidItems){
-			System.out.println("item1");
 			counter=0;
 			interested=0;
 			interestedBidders.clear();
@@ -243,7 +256,7 @@ public class Auctioneer implements Runnable {
 			//send start bidding to all
 			this.bidItem();
 			
-			System.out.format(" %s ", item.getDescription());
+			System.out.format("\nNew item: %s \n", item.getDescription());
 			
 			//receive i am interested messages or new connections
 			tEnd = System.currentTimeMillis();
@@ -271,7 +284,7 @@ public class Auctioneer implements Runnable {
 			        		client.configureBlocking(false);
 			        		// Add the new connection to the selector
 			        		client.register(selector, SelectionKey.OP_READ);
-			        		System.out.println("Successful accept2!");
+			        		//System.out.println("Successful accept2!");
 			        		}
 			        	else if (key.isReadable()) {
 			        			 
@@ -293,14 +306,14 @@ public class Auctioneer implements Runnable {
 				
 			}
 			
-			System.out.println("after I am interested!");
+			//System.out.println("after I am interested!");
 			
 			//if at least two bidders are interested
-			if (interested>=1){
+			if (this.interestedBidders.size()>=1){
 				
 				//begin the auction for the current item
 				this.startBidding();
-				System.out.println("start bidding was sent!");
+				//System.out.println("start bidding was sent!");
 				offer_is_on = 1;
 				
 				while (offer_is_on==1){
@@ -355,28 +368,34 @@ public class Auctioneer implements Runnable {
 					       
 					}
 					
-					System.out.println("after bids were done!");
+					//System.out.println("after bids were done!");
 					
 					//check if nobody has bid for the current item
 					if ((currentItem.getHighestBidderName()).equals("no_holder")){
 						currentItem.setCurrentPrice(0.9*currentItem.getCurrentPrice());
 						counter++;
-						if (counter>=6){
-							offer_is_on=0;
-							this.stopBidding();
-							System.out.println("count = 6! ");
+						// if all bidders have quit
+						if (this.interestedBidders.size() == 0) {
+							//System.out.println("Nobody to bid! Moving on to next item!");
+							offer_is_on = 0;
 						}
 						else {
-							this.newHighBid();
-							System.out.println("10 down! ");
-						}
-							
+							if (counter>=6){
+								offer_is_on=0;
+								this.stopBidding();
+								//System.out.println("Value can't drop more! Moving on to next item!");
+							}
+							else {
+								this.newHighBid();
+								//System.out.println("10 down! ");
+							}
+						}							
 					}
 					else {
 						//if a successful bid was placed, stop the bidding process and sell the item
 						this.stopBidding();
-						offer_is_on=0;
-						System.out.println("item sold! ");
+						offer_is_on = 0;
+						//System.out.println("item sold! ");
 					}
 				}
 			}
@@ -389,7 +408,8 @@ public class Auctioneer implements Runnable {
 			}
 			
 		}
-		System.out.println("reached auction!");
+		
+		System.out.println("Auction finished!");
 		
 		//wait for system to stabilize before sending new message
 		try {
@@ -399,9 +419,7 @@ public class Auctioneer implements Runnable {
 		}
 		
 		//terminate auction
-		System.out.println("reached auction2!");
 		this.auctionComplete();
-		System.out.println("after auction!");
 		timer.cancel();
 	}
 

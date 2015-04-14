@@ -66,17 +66,19 @@ public class MessageServerHandler {
 			break;
 		case '1':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[3],0,null);
-			RegTableEntry newInterest = new RegTableEntry(client, bidder); 
-			auctioneer.addToInterestedBidders(newInterest);
-			mtype = 1;
+			if (auctioneer.getCurrentItem().getItemId() == Double.parseDouble(args[2])) {
+				bidder = new Bidder(args[3],0,null);
+				RegTableEntry newInterest = new RegTableEntry(client, bidder); 
+				auctioneer.addToInterestedBidders(newInterest);
+				mtype = 1;
+			}
+			else mtype = 10;
 			break;
 		case '2':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[4],0,null);
 			RegTableEntry tempEntry = new RegTableEntry(client, bidder);
-			auctioneer.receiveBid(Double.parseDouble(args[2]), Integer.parseInt(args[3]), tempEntry);
-			mtype = 2;
+			mtype = auctioneer.receiveBid(Double.parseDouble(args[2]), Integer.parseInt(args[3]), tempEntry);
 			break;
 		case '3':
 			args = message.split("\\s+");

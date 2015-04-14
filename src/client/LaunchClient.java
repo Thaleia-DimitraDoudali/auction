@@ -26,6 +26,7 @@ public class LaunchClient {
 			e1.printStackTrace();
 		}
 
+		System.out.print("Enter your name: \n>>");
 		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 		String s = null;
 		try {

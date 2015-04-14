@@ -1,7 +1,7 @@
 1.launchserver: thaleia, (read items from file)
-2.launchclient : change bidder,put Socket() in Bidder,read users from file (?)
-3.auctioneer: quit,interested>=2
-4.bidder: (change channel),(constructor),(listhighbid),(listdescription),(check valid bid),(quit command),terminal,
+2.launchclient : (change bidder),(put Socket() in Bidder),read users from file (?)
+3.auctioneer: (quit),(interested>=2), gossip protocol
+4.bidder: (change channel),(constructor),(listhighbid),(listdescription),(check valid bid),(quit command),run using terminal instead of console
 5.clienthandler: (channel)
 6.serverhandler:(when bidder constructor changes, change it here too)
 7.regtable:done

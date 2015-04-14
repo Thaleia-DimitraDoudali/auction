@@ -112,7 +112,7 @@ public class MessageClientHandler {
 		String[] args;
 		int mtype;
 		
-		System.out.format("Received messageId: %s %n",message);
+		//System.out.format("Received messageId: %s %n",message);
 		
 		switch (messageId) {
 		case '4':
@@ -125,7 +125,7 @@ public class MessageClientHandler {
 			mtype = 4;
 			break;
 		case '5':
-			//args = message.split("\\s+");
+			args = message.split("\\s+");
 			//should use args[2] to confirm itemId is the item.getItemId()
 			mtype = 5;
 			break;
