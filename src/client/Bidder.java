@@ -267,6 +267,13 @@ public class Bidder implements Runnable {
 						  It will get in the next if and break*/
 						if (id2 == 4)
 							nextItem = 1;
+						if (id2 == 8){
+							System.out.print("\nThe auction is completed! ");
+							printItemsBought();
+							System.out.println("Thank you for participating!");
+							auction_is_on = 0;
+							return;
+						}
 						if (id2 != 10) {
 							System.out.println("\nThe auction has already began.\nYou will be informed about the next item soon...");
 							break;
