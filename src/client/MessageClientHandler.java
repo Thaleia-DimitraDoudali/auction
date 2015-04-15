@@ -6,7 +6,20 @@ import java.nio.channels.*;
 
 import server.Item;
 
-//Message format = message's name + ' ' + rest;
+/* Message format = id + ' ' + message's name + ' ' + rest;
+	connect = 0
+	i_am_interested = 1
+	my_bid = 2
+	quit = 3
+	bid_item = 4
+	start_bidding = 5
+	new_high_bid = 6 
+	stop_bidding = 7
+	auction_complete = 8
+	duplicate_name = 9
+	empty message = 10
+	wrong itemId = 11 
+*/
 
 public class MessageClientHandler {
 	private SocketChannel channel;
@@ -18,8 +31,6 @@ public class MessageClientHandler {
 		this.setBidder(bidder);
 	}
 	
-	
-
 	//Getters - setters
 	public SocketChannel getSocketChannel() {
 		return channel;
@@ -37,8 +48,6 @@ public class MessageClientHandler {
 		this.bidder = bidder;
 	}
 	
-	
-	
 	//Send an already composed message
 	public void sendString(String message) {
 		byte [] bmessage = new String(message).getBytes();
@@ -50,16 +59,13 @@ public class MessageClientHandler {
 		}
 	}
 	
-	
-	//Messages that a bidder can send
+	//------Messages that a bidder can send------
 	
 	//Compose and send a connect message to auctioneer
 	public void sendConnect() {
-		//protocol: id + connect + etc
 		String message = "0 connect" + ' ' + bidder.getBidderName();
 		sendString(message);
 	}
-	
 	
 	//Compose and send an i_am_interested message to auctioneer
 	public void sendInterested(Item item) {
@@ -68,36 +74,23 @@ public class MessageClientHandler {
 	}
 	
 	//Compose and send a my_bid message to auctioneer
-	//!! confirmation that amount > price should be in Bidder, not in handler
 	public void sendBid(Item item, double amount) {
 		String message = "2 my_bid" + ' ' + amount + ' ' + item.getItemId() + ' ' + bidder.getBidderName();
 		sendString(message);
 	}
-	
 
+	//Compose and send a quit message to auctioneer
 	public void sendQuit() {
 		String message = "3 quit" + ' ' + bidder.getBidderName();
 		sendString(message);
 	}
 	
+	//-------Messages that a bidder can receive------
 	
-	//Messages that a bidder can receive
-	
+	/*According to the type of message, the handler will change the fields of bidder's current item. 
+	  Returns the integer message id, so that bidder can continue the processing of the message. */
 	public int receiveMessage() {
-		//According to message call the appropriate Bidder function, which will
-		//usually have to inform the bidder (command line out) about what happened!
-		
-		//connect = 0
-		//i_am_interested = 1
-		//my_bid = 2
-		//quit = 3
-		//bid_item = 4
-		//start_bidding = 5
-		//new_high_bid = 6
-		//stop_bidding = 7
-		//auction_complete = 8
-		//duplicate_name = 9
-		
+			
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		try {
 			channel.read(buffer);
@@ -115,60 +108,66 @@ public class MessageClientHandler {
 		//System.out.format("Received messageId: %s %n",message);
 		
 		switch (messageId) {
-		case '4':
-			args = message.split("\\s+");
-			(bidder.getItem()).setItemId(Integer.parseInt(args[2]));
-			(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[3]));
-			(bidder.getItem()).setInitialPrice(Double.parseDouble(args[3]));
-			String description = message.replace("4 new_item " + args[2] + ' ' + args[3] + ' ', "");
-			(bidder.getItem()).setDescription(description);
-			mtype = 4;
-			break;
-		case '5':
-			args = message.split("\\s+");
-			if (bidder.getItem().getItemId() != Integer.parseInt(args[2])) {
-				(bidder.getItem()).setHighestBidderName("_unknown");
-				mtype = 11;
-			}
-			else
-				mtype = 5;
-			break;
-		case '6':
-			args = message.split("\\s+");
-			if (bidder.getItem().getItemId() != Integer.parseInt(args[4])) {
-				(bidder.getItem()).setHighestBidderName("_unknown");
-				mtype = 11;
-			}
-			else {
-				(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
-				(bidder.getItem()).setHighestBidderName(args[3]);
-				mtype = 6;
-			}
-			break;
-		case '7':
-			args = message.split("\\s+");
-			if (bidder.getItem().getItemId() != Integer.parseInt(args[4])) {
-				(bidder.getItem()).setHighestBidderName("_unknown");
-				mtype = 11;
-			}
-			else {
-				(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
-				(bidder.getItem()).setHighestBidderName(args[3]);
-				mtype = 7;
-			}
-			break;
-		case '8':
-			mtype = 8;
-			break;
-		case '9':
-			mtype = 9;
-			break;
-		default:
-			mtype = 10;
-			break;
-		}
 		
+			//bid_item
+			case '4':
+				args = message.split("\\s+");
+				(bidder.getItem()).setItemId(Integer.parseInt(args[2]));
+				(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[3]));
+				(bidder.getItem()).setInitialPrice(Double.parseDouble(args[3]));
+				String description = message.replace("4 new_item " + args[2] + ' ' + args[3] + ' ', "");
+				(bidder.getItem()).setDescription(description);
+				mtype = 4;
+				break;
+			//start_bidding
+			case '5':
+				args = message.split("\\s+");
+				if (bidder.getItem().getItemId() != Integer.parseInt(args[2])) {
+					(bidder.getItem()).setHighestBidderName("_unknown");
+					mtype = 11;
+				}
+				else
+					mtype = 5;
+				break;
+			//new_high_bid
+			case '6':
+				args = message.split("\\s+");
+				if (bidder.getItem().getItemId() != Integer.parseInt(args[4])) {
+					(bidder.getItem()).setHighestBidderName("_unknown");
+					mtype = 11;
+				}
+				else {
+					(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
+					(bidder.getItem()).setHighestBidderName(args[3]);
+					mtype = 6;
+				}
+				break;
+			//stop_bidding
+			case '7':
+				args = message.split("\\s+");
+				if (bidder.getItem().getItemId() != Integer.parseInt(args[4])) {
+					(bidder.getItem()).setHighestBidderName("_unknown");
+					mtype = 11;
+				}
+				else {
+					(bidder.getItem()).setCurrentPrice(Double.parseDouble(args[2]));
+					(bidder.getItem()).setHighestBidderName(args[3]);
+					mtype = 7;
+				}
+				break;
+			//auction_complete
+			case '8':
+				mtype = 8;
+				break;
+			//duplicate_name
+			case '9':
+				mtype = 9;
+				break;
+			//empty message
+			default:
+				mtype = 10;
+				break;
+		}		
 		return mtype;
-
 	}
 }

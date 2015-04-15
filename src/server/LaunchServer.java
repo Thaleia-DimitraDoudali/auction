@@ -11,30 +11,12 @@ public class LaunchServer {
 
 	public static void main(String[] args) {
 
-		//TODO Read configuration file L, items
-		//TODO As you read items, add them to a List<Item> to pass it as an argument on Auctioneer constructor
-		//TODO If 2 auctioneers store items to a mysql database
-
-//		String connectionURL = "jdbc:mysql://localhost:3306/mydatabase";
-	//	Connection connection = null;
-		//Statement statement = null;
-		//Class.forName("com.mysql.jdbc.Driver").newInstance();
-		//connection = DriverManager.getConnection(connectionURL, dbuser, dbpass);						
-		
-		
-		//List<Item> 
-		//for item in List
-		//statement = connection.createStatement();
-		//opou VALUES meta item.getDescription();
-		//String sql = "INSERT INTO items (username, password) VALUES( \"" + username  + "\" ,\"" + password + "\") ;";
-		//int result = statement.executeUpdate(sql);
-		
-		//TODO Just one auctioneer for now - later on add second one and implement sync server.
-		
+		//TODO: If 2 auctioneers store items to 2 mysql databases
+		//TODO: Read items.txt from args[1] and port one for each auctioneer because we're on localhost
 		
 	    BufferedReader br = null;
 		try {
-			br = new BufferedReader(new FileReader("/home/christos/items.txt"));
+			br = new BufferedReader(new FileReader("/home/thaleia/Desktop/auction/items.txt"));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -67,7 +49,10 @@ public class LaunchServer {
 				e.printStackTrace();
 			}
 		
-        (new Thread(new Auctioneer(L/1000,bidItems))).start();    
+		//TODO: pass bidder port to constructor
+        (new Thread(new Auctioneer(L/1000,bidItems))).start(); 
+        //TODO: add another new auctioneer thread
+        
 	}
 
 }

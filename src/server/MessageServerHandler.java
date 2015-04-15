@@ -6,7 +6,19 @@ import java.nio.channels.SocketChannel;
 
 import client.Bidder;
 
-//Message format = message's name + ' ' + rest;
+/* Message format = id + ' ' + message's name + ' ' + rest;
+	connect = 0
+	i_am_interested = 1
+	my_bid = 2
+	quit = 3
+	bid_item = 4
+	start_bidding = 5
+	new_high_bid = 6 
+	stop_bidding = 7
+	auction_complete = 8
+	duplicate_name = 9
+	empty message, wrong itemId = 10
+*/
 
 public class MessageServerHandler {
 
@@ -17,6 +29,7 @@ public class MessageServerHandler {
 		this.setAuctioneer(auctioneer);
 	}
 	
+	//Getter - Setter
 	public Auctioneer getAuctioneer() {
 		return auctioneer;
 	}
@@ -25,19 +38,8 @@ public class MessageServerHandler {
 		this.auctioneer = auctioneer;
 	}
 	
-	//Receive and decode message
+	//Receive and decode messages from client
 	public int receiveMessage(SocketChannel client){
-		
-		//connect = 0
-		//i_am_interested = 1
-		//my_bid = 2
-		//quit = 3
-		//bid_item = 4
-		//start_bidding = 5
-		//new_high_bid = 6
-		//stop_bidding = 7
-		//auction_complete = 8
-		//duplicate_name = 9
 		
 		ByteBuffer buffer = ByteBuffer.allocate(256);
 		try {
@@ -57,6 +59,7 @@ public class MessageServerHandler {
 		System.out.format("Received messageId: %s %n",message);
 		
 		switch (messageId) {
+		//connect
 		case '0':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[2],0,null);
@@ -64,6 +67,7 @@ public class MessageServerHandler {
 			auctioneer.addToRegTable(newEntry);
 			mtype = 0;
 			break;
+		//interested
 		case '1':
 			args = message.split("\\s+");
 			if (auctioneer.getCurrentItem().getItemId() == Double.parseDouble(args[2])) {
@@ -74,12 +78,14 @@ public class MessageServerHandler {
 			}
 			else mtype = 10;
 			break;
+		//bid amount
 		case '2':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[4],0,null);
 			RegTableEntry tempEntry = new RegTableEntry(client, bidder);
 			mtype = auctioneer.receiveBid(Double.parseDouble(args[2]), Integer.parseInt(args[3]), tempEntry);
 			break;
+		//quit
 		case '3':
 			args = message.split("\\s+");
 			bidder = new Bidder(args[2],0,null);
@@ -88,13 +94,12 @@ public class MessageServerHandler {
 			auctioneer.removeFromRegTable(entry);
 			mtype = 3;
 			break;
+		//error
 		default:
 			mtype = 10;
 			break;
 		}
-
 		return mtype;
-		
 	}
 	
 	public void sendMessage(String message, SocketChannel client) {
