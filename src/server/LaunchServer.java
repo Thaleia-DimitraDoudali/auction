@@ -16,7 +16,7 @@ public class LaunchServer {
 		
 	    BufferedReader br = null;
 		try {
-			br = new BufferedReader(new FileReader("/home/thaleia/Desktop/auction/items.txt"));
+			br = new BufferedReader(new FileReader(args[0]));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

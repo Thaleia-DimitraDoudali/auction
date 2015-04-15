@@ -1,0 +1,20 @@
+1. Run server
+   eclipse->file->export->Java->Runnable JAR file-> 
+	Launch configuration = LaunchServer 
+	Export destination = code file
+	Name jar = server.jar
+	Package required libraries into generated JAR
+
+   terminal-> java -jar server.jar /path/to/items.txt
+
+2. Run client
+   eclipse->file->export->Java->Runnable JAR file-> 
+	Launch configuration = LaunchClient
+	Export destination = code file
+	Name jar = client.jar
+	Package required libraries into generated JAR
+
+   terminal-> java -jar client.jar 
+
+Note:
+	Now the jars contain both the server and client code, which is not a good thing in general
