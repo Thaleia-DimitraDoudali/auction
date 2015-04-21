@@ -14,29 +14,31 @@ public class LaunchClient {
 
 	public static void main(String[] args) {
 		
-		//TODO: Read bidder port from args
-		
-		int bidderPort = 2223;
+		//Read hostname and bidderPort from cat auct_name, thus args[0], args[1] and bidderName from args[2]
+		System.out.println(args[0] + " " + args[1] + " " + args[2]);
 		InetAddress hostname = null;
 		try {
-			//Now it's the local host IPv4, it could also be a VM IPv4.
-			hostname = InetAddress.getLocalHost();
-		} catch (UnknownHostException e1) {
-			e1.printStackTrace();
-		}
-
-		//Read client's name
-		System.out.print("Enter your name: \n>>");
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		String s = null;
-		try {
-			s = in.readLine();
-		} catch (IOException e) {
+			hostname = InetAddress.getByName(args[0]);
+		} catch (UnknownHostException e) {
 			e.printStackTrace();
+		}
+		int bidderPort = Integer.parseInt(args[1]);
+		String bidderName = args[2];
+		//if bidderName == no_holder, it's not permitted, so read the bidderName from the terminal 
+		if (bidderName.equals("no_holder")) {
+			//Read client's name
+			System.out.print("Enter your name: \n>>");
+			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+			bidderName = null;
+			try {
+				bidderName = in.readLine();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 		
 		//Launch bidder
-		Bidder bidder = new Bidder(s, bidderPort, hostname);
+		Bidder bidder = new Bidder(bidderName, bidderPort, hostname);
 		(new Thread(bidder)).start();
 
 	}

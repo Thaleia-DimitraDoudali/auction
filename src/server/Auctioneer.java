@@ -177,6 +177,23 @@ public class Auctioneer implements Runnable {
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		}
+		
+		//cat auct_name so that the bidder can find out the ip and port of the auctioneer
+		try {
+			String content = "localhost" + " " + bidderPort + " ";
+			//The auct_name file will be created at the current directory
+			String workingDir = System.getProperty("user.dir");
+			File file = new File(workingDir + "/auct_name");
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			FileWriter fw = new FileWriter(file.getAbsoluteFile());
+			BufferedWriter bw = new BufferedWriter(fw);
+			bw.write(content);
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		//Channel preparation
 		try {

@@ -14,7 +14,7 @@
 	Name jar = client.jar
 	Package required libraries into generated JAR
 
-   terminal-> java -jar client.jar 
+   terminal-> java -jar client.jar $(cat auct_name) <bidderName>
 
 Note:
 	Now the jars contain both the server and client code, which is not a good thing in general
