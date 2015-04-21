@@ -13,6 +13,7 @@ import java.util.TimerTask;
 
 public class Auctioneer implements Runnable {
 
+	private int bidderPort;
 	private int L;
 	private Timer timer;
 	private Selector selector;
@@ -31,12 +32,12 @@ public class Auctioneer implements Runnable {
 	  }
 
 	//Constructor
-	//TODO: Add bidderport to constructor
-	public Auctioneer(int L, List<Item> bidItems){
+	public Auctioneer(int L, List<Item> bidItems, int port){
 		this.setBidItems(bidItems);
 		this.L = L;
 		this.currentItem = new Item(0,0,"none_yet");
 		this.timer = new Timer();
+		this.bidderPort = port;
 	}
 
 	//Getters - setters
@@ -162,11 +163,8 @@ public class Auctioneer implements Runnable {
 	public void run() {
 		
 		System.out.println("Auctioneer up and running!");
-		
-		//TODO: 2 ports enan gia kathe auctioneer, bidderport mesw tou constructor
-				
+						
 		//set up connection
-		int bidderPort = 2223;
 		ServerSocketChannel ssc = null;
 		InetSocketAddress isa;
 		selector = null;

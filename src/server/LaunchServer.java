@@ -12,11 +12,14 @@ public class LaunchServer {
 	public static void main(String[] args) {
 
 		//TODO: If 2 auctioneers store items to 2 mysql databases
-		//TODO: Read items.txt from args[1] and port one for each auctioneer because we're on localhost
+		
+		
+		//Read bidderPort from args, it will be different for each auctioneer
+		int bidderPort = Integer.parseInt(args[0]);
 		
 	    BufferedReader br = null;
 		try {
-			br = new BufferedReader(new FileReader(args[0]));
+			br = new BufferedReader(new FileReader(args[1]));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -48,10 +51,9 @@ public class LaunchServer {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		
-		//TODO: pass bidder port to constructor
-        (new Thread(new Auctioneer(L/1000,bidItems))).start(); 
-        //TODO: add another new auctioneer thread
+			
+        (new Thread(new Auctioneer(L/1000,bidItems, bidderPort))).start(); 
+        //TODO: add another new auctioneer thread with (bidderPort+1)
         
 	}
 

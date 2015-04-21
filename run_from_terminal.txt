@@ -5,7 +5,7 @@
 	Name jar = server.jar
 	Package required libraries into generated JAR
 
-   terminal-> java -jar server.jar /path/to/items.txt
+   terminal-> java -jar server.jar <bidderPort> /path/to/items.txt
 
 2. Run client
    eclipse->file->export->Java->Runnable JAR file-> 
