@@ -301,7 +301,8 @@ public class Bidder implements Runnable {
 							}
 							
 							//Bidding started!
-							System.out.print("You can now bid for the item! Type the word 'bid' and the amount you are willing to offer:\n>> ");
+							System.out.print("You can now bid for the item! Type the word 'bid' and the amount you are willing to offer:\n ");
+							System.out.print("Other valid commands:\t list_high_bid\t list_description\t quit\n>>");
 							if (biddingFunction(in)) 
 								return;
 							
