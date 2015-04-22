@@ -11,8 +11,10 @@ import server.MessageServerHandler;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Auctioneer implements Runnable {
-
+//public class Auctioneer implements Runnable {
+public class Auctioneer extends Thread{
+	
+	private int serverId;
 	private int bidderPort;
 	private int L;
 	private Timer timer;
@@ -33,7 +35,8 @@ public class Auctioneer implements Runnable {
 	  }
 
 	//Constructor
-	public Auctioneer(int L, List<Item> bidItems, int port){
+	public Auctioneer(int id, int L, List<Item> bidItems, int port){
+		this.serverId = id;
 		this.setBidItems(bidItems);
 		this.L = L;
 		this.currentItem = new Item(0,0,"none_yet");
@@ -57,6 +60,10 @@ public class Auctioneer implements Runnable {
 	public Item getCurrentItem() {
 		return currentItem;
 	}
+	
+	public int getServerId() {
+		return this.serverId;
+	}
 
 	public void setCurrentItem(Item currentItem) {
 		this.currentItem = currentItem;
@@ -70,7 +77,7 @@ public class Auctioneer implements Runnable {
 			e.printStackTrace();
 		}
  		if (regTable.remove(entry))
- 			System.out.println("Entry removed");
+ 			System.out.println("[" + serverId +"] Entry removed");
  	}
 	//Called at connect
 	public void addToRegTable(RegTableEntry entry) {
@@ -167,7 +174,7 @@ public class Auctioneer implements Runnable {
 	@SuppressWarnings("unused")
 	public void run() {
 		
-		System.out.println("Auctioneer up and running!");
+		System.out.println("[" + serverId +"] Auctioneer up and running!");
 						
 		//set up connection
 		ServerSocketChannel ssc = null;
@@ -186,7 +193,7 @@ public class Auctioneer implements Runnable {
 			String content = "localhost" + " " + bidderPort + " ";
 			//The auct_name file will be created at the current directory
 			String workingDir = System.getProperty("user.dir");
-			File file = new File(workingDir + "/auct_name");
+			File file = new File(workingDir + "/auct_name" + serverId);
 			if (!file.exists()) {
 				file.createNewFile();
 			}
@@ -203,13 +210,13 @@ public class Auctioneer implements Runnable {
 			selector= Selector.open();
 			ssc = ServerSocketChannel.open();
 			isa = new InetSocketAddress(hostname, bidderPort);
-			System.out.println("Successful connection!");
+			System.out.println("[" + serverId +"] Successful connection!");
 			ssc.bind( isa );
 			ssc.configureBlocking( false );
 			int ops = ssc.validOps();
 			ssc.register(selector, ops, null);
 		} catch (IOException e) {
-			System.out.println("Couldn't listen on bidders port! Server must be reset!");
+			System.out.println("[" + serverId +"] Couldn't listen on bidders port! Server must be reset!");
 			return;
 		}
 
@@ -224,7 +231,7 @@ public class Auctioneer implements Runnable {
 			
 			//Auction timeout at 3L
 			if ((tEnd-tStart)/1000 > 3*L) {
-				System.out.println("No bidders, auction was aborted");
+				System.out.println("[" + serverId +"] No bidders, auction was aborted");
 				timer.cancel();
 				return;
 			}
@@ -283,7 +290,7 @@ public class Auctioneer implements Runnable {
 		  while (iterator.hasNext()) {
 			currentItem = iterator.next();
 			index++;
-			
+						
 			counter=0;
 			interested=0;
 			interestedBidders.clear();
@@ -292,7 +299,7 @@ public class Auctioneer implements Runnable {
 			//Send new_item to registered bidders
 			this.bidItem();
 			
-			System.out.format("\nNew item: %s \n", currentItem.getDescription());
+			System.out.format("\n[" + serverId +"] New item: %s \n", currentItem.getDescription());
 			
 			tEnd = System.currentTimeMillis();
 			tStart = System.currentTimeMillis();
@@ -435,7 +442,7 @@ public class Auctioneer implements Runnable {
 			}
 		  }
 		} //All items sold!
-		System.out.println("Auction finished!");		
+		System.out.println("[" + serverId +"] Auction finished!");		
 		//wait for system to stabilize before sending new message
 		try {
 			Thread.sleep(1000);

@@ -56,7 +56,7 @@ public class MessageServerHandler {
 		Bidder bidder;
 		int mtype;
 		
-		System.out.format("Received messageId: %s %n",message);
+		System.out.format("[" + auctioneer.getServerId() +"] Received messageId: %s %n",message);
 		
 		switch (messageId) {
 		//connect

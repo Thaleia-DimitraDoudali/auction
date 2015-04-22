@@ -52,8 +52,8 @@ public class LaunchServer {
 				e.printStackTrace();
 			}
 			
-        (new Thread(new Auctioneer(L/1000,bidItems, bidderPort))).start(); 
-        //TODO: add another new auctioneer thread with (bidderPort+1)
+        (new Thread(new Auctioneer(1, L/1000,bidItems, bidderPort))).start(); 
+        (new Thread(new Auctioneer(2, L/1000,bidItems, bidderPort+1))).start(); 
         
 	}
 
