@@ -18,6 +18,7 @@ public class Auctioneer implements Runnable {
 	private Timer timer;
 	private Selector selector;
 	private List<Item> bidItems;
+	private int index;
 	private List<RegTableEntry> regTable = new ArrayList<RegTableEntry>();
 	private Item currentItem;
 	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>(); 
@@ -46,8 +47,11 @@ public class Auctioneer implements Runnable {
 	}
 
 	public void setBidItems(List<Item> bidItems) {
-		this.bidItems = bidItems;
-		//TODO: Copy items one by one so that each auctioneer has his own bidItems list
+		//this.bidItems = bidItems;
+		this.bidItems = new ArrayList<Item>();
+		for (Item item : bidItems){
+			this.bidItems.add(item);
+		}
 	}
 
 	public Item getCurrentItem() {
@@ -98,6 +102,7 @@ public class Auctioneer implements Runnable {
 			if (currentItem.getCurrentPrice() < amount) {
 				currentItem.setCurrentPrice(amount);
 				currentItem.setHighestBidderName((entry.getBidder()).getBidderName());
+				this.bidItems.set(index, currentItem);
 				//send new_high_bid
 				this.newHighBid();
 				return 2;
@@ -270,23 +275,24 @@ public class Auctioneer implements Runnable {
 		
 		//System.out.println("reached list!");
 		
-		//TODO: while (bidItems.length() > 0) - override equals at Item
-		for (Item item : bidItems){
+		//Iterate through the list of items until all items sold
+		while (this.bidItems.size() > 0) {	
+		  Iterator<Item> iterator = this.bidItems.iterator();
+		  //Index is the index of currentItem on bidItems list
+		  index = -1;
+		  while (iterator.hasNext()) {
+			currentItem = iterator.next();
+			index++;
 			
 			counter=0;
 			interested=0;
 			interestedBidders.clear();
 			bidded=0;
-			currentItem.setItemId(item.getItemId());
-			currentItem.setInitialPrice(item.getInitialPrice());
-			currentItem.setDescription(item.getDescription());
-			currentItem.setCurrentPrice(item.getCurrentPrice());
-			currentItem.setHighestBidderName(item.getHighestBidderName());
 
 			//Send new_item to registered bidders
 			this.bidItem();
 			
-			System.out.format("\nNew item: %s \n", item.getDescription());
+			System.out.format("\nNew item: %s \n", currentItem.getDescription());
 			
 			tEnd = System.currentTimeMillis();
 			tStart = System.currentTimeMillis();
@@ -383,8 +389,8 @@ public class Auctioneer implements Runnable {
 					
 					//If no one wanted the item = no_holder then reduce price
 					if ((currentItem.getHighestBidderName()).equals("no_holder")){
-						//TODO: the item should also change on bidItems list so that if noone buys it, the reduced price stays on bidItems
 						currentItem.setCurrentPrice(0.9*currentItem.getCurrentPrice());
+						this.bidItems.set(index, currentItem);
 						counter++;
 						//Reduced price, check if you should send it or not
 						// if all bidders have quit
@@ -397,6 +403,9 @@ public class Auctioneer implements Runnable {
 							if (counter>=6){
 								offer_is_on=0;
 								this.stopBidding();
+								//At this point the item will get back to auction later on, so initialPrice becomes currentPrice
+								currentItem.setInitialPrice(currentItem.getCurrentPrice());
+								this.bidItems.set(index, currentItem);
 								//System.out.println("Value can't drop more! Moving on to next item!");
 							}
 							else {
@@ -404,14 +413,16 @@ public class Auctioneer implements Runnable {
 								this.newHighBid();
 								//System.out.println("10 down! ");
 							}
-						}							
+						}
 					}
 					//if there were interested bidders on the item
 					else {
 						//if a successful bid was placed, stop the bidding process and sell the item
 						this.stopBidding();
 						offer_is_on = 0;
-						//TODO: bidItems.remove(currentItem); override equals for itemId at Item class  
+						//Remove current item from bidItems
+						iterator.remove();
+				        index--;
 						//System.out.println("item sold! ");
 					}
 				}
@@ -422,8 +433,8 @@ public class Auctioneer implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
-		//TODO: All items sold if while!! 
+		  }
+		} //All items sold!
 		System.out.println("Auction finished!");		
 		//wait for system to stabilize before sending new message
 		try {
