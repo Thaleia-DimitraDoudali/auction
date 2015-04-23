@@ -16,7 +16,7 @@ public class LaunchServer {
 		
 		//Read bidderPort from args, it will be different for each auctioneer
 		int bidderPort = Integer.parseInt(args[0]);
-		
+		DBconnector db1 = null, db2 = null;
 	    BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(args[1]));
@@ -38,8 +38,8 @@ public class LaunchServer {
 				int N = Integer.parseInt(args[0]);
 	        
 				//read items and store to the two databases
-				DBconnector db1 = new DBconnector(1);
-				DBconnector db2 = new DBconnector(2);
+				db1 = new DBconnector(1);
+				db2 = new DBconnector(2);
 				for (int i=1;i<=N;i++) {
 					line = br.readLine();
 					args = line.split("\\s+");
@@ -48,16 +48,16 @@ public class LaunchServer {
 					description = description.trim();
 					Item item = new Item(i,price,description);
 					bidItems.add(item);
-					db1.addItemToDB(i, price, description);
-					db2.addItemToDB(i, price, description);
+					db1.addItemToDB(item);
+					db2.addItemToDB(item);
 				}
 				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 			
-        (new Thread(new Auctioneer(1, L/1000,bidItems, bidderPort))).start(); 
-        (new Thread(new Auctioneer(2, L/1000,bidItems, bidderPort+1))).start(); 
+        (new Thread(new Auctioneer(1, L/1000,bidItems, bidderPort, db1))).start(); 
+        (new Thread(new Auctioneer(2, L/1000,bidItems, bidderPort+1, db2))).start(); 
         
 	}
 

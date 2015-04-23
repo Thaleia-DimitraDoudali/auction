@@ -24,6 +24,7 @@ public class Auctioneer implements Runnable {
 	private Item currentItem;
 	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>(); 
 	MessageServerHandler handler = new MessageServerHandler(this);
+	DBconnector db;
 	
 	//Timer that unblocks selector.select()
 	class WakeUp extends TimerTask {
@@ -34,13 +35,14 @@ public class Auctioneer implements Runnable {
 	  }
 
 	//Constructor
-	public Auctioneer(int id, int L, List<Item> bidItems, int port){
+	public Auctioneer(int id, int L, List<Item> bidItems, int port, DBconnector db){
 		this.serverId = id;
 		this.setBidItems(bidItems);
 		this.L = L;
 		this.currentItem = new Item(0,0,"none_yet");
 		this.timer = new Timer();
 		this.bidderPort = port;
+		this.db = db;
 	}
 
 	//Getters - setters
@@ -107,7 +109,9 @@ public class Auctioneer implements Runnable {
 		if ((itemId == currentItem.getItemId()) && (interestedBidders.contains(entry))) {
 			if (currentItem.getCurrentPrice() < amount) {
 				currentItem.setCurrentPrice(amount);
+				db.setItemCurrPrice(index+1, amount);
 				currentItem.setHighestBidderName((entry.getBidder()).getBidderName());
+				db.setItemHighestBidder(index+1, (entry.getBidder()).getBidderName());
 				this.bidItems.set(index, currentItem);
 				//send new_high_bid
 				this.newHighBid();
@@ -174,7 +178,7 @@ public class Auctioneer implements Runnable {
 	public void run() {
 		
 		System.out.println("[" + serverId +"] Auctioneer up and running!");
-						
+		
 		//set up connection
 		ServerSocketChannel ssc = null;
 		InetSocketAddress isa;
@@ -289,6 +293,10 @@ public class Auctioneer implements Runnable {
 		  while (iterator.hasNext()) {
 			currentItem = iterator.next();
 			index++;
+			
+			Item item = db.getItem(index+1);
+			System.out.print("[" + serverId + "] ");
+			item.print();
 						
 			counter=0;
 			interested=0;
