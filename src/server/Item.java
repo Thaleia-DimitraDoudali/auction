@@ -1,8 +1,5 @@
 package server;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-
 public class Item{
 		
 	private int itemId;
@@ -69,15 +66,6 @@ public class Item{
 		this.highestBidderName = highestBidderName;
 	}
 
-	//Iterator construction 
-	
-	ArrayList<Item> bidItems;
-
-	
-	public Iterator<Item> iterator() {
-		return new ItemIterator();
-	}
-	
 	public int getSold() {
 		return sold;
 	}
@@ -85,29 +73,4 @@ public class Item{
 	public void setSold(int sold) {
 		this.sold = sold;
 	}
-
-	class ItemIterator implements Iterator<Item> {
-		int currentIndex = 0;
-
-		@Override
-		public boolean hasNext() {
-			if (currentIndex >= bidItems.size()) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-
-		@Override
-		public Item next() {
-			return bidItems.get(currentIndex++);
-		}
-
-		@Override
-		public void remove() {
-			bidItems.remove(--currentIndex);
-		}
-
-	}
-
 }
