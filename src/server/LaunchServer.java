@@ -51,10 +51,12 @@ public class LaunchServer {
 			e.printStackTrace();
 		}
 		
+		SyncServer sync = new SyncServer(db1, db2);
+		
 		//Auctioneer 1
-		(new Thread(new Auctioneer(1, L / 1000, N, bidderPort, db1))).start();
+		(new Thread(new Auctioneer(1, L / 1000, N, bidderPort, db1, sync))).start();
 		//Auctioneer 2
-		(new Thread(new Auctioneer(2, L / 1000, N, bidderPort + 1, db2))).start();
+		(new Thread(new Auctioneer(2, L / 1000, N, bidderPort + 1, db2, sync))).start();
 
 	}
 

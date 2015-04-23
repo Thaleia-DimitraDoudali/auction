@@ -24,6 +24,7 @@ public class Auctioneer implements Runnable {
 	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>();
 	private MessageServerHandler handler = new MessageServerHandler(this);
 	private DBconnector db;
+	private SyncServer sync;
 
 	// Timer that unblocks selector.select()
 	class WakeUp extends TimerTask {
@@ -34,10 +35,10 @@ public class Auctioneer implements Runnable {
 	}
 
 	// Constructor
-	public Auctioneer(int id, int L, int N, int port, DBconnector db) {
+	public Auctioneer(int id, int L, int N, int port, DBconnector db, SyncServer sync) {
 		this.serverId = id;
 		this.N = N;
-		;
+		this.sync = sync;
 		this.L = L;
 		this.timer = new Timer();
 		this.bidderPort = port;
@@ -167,7 +168,7 @@ public class Auctioneer implements Runnable {
 	public void run() {
 
 		System.out.println("[" + serverId + "] Auctioneer up and running!");
-
+		
 		// set up connection
 		ServerSocketChannel ssc = null;
 		InetSocketAddress isa;
@@ -280,7 +281,7 @@ public class Auctioneer implements Runnable {
 		int counter = 0;
 
 		// System.out.println("reached list!");
-
+	
 		// Iterate through the list of items until all items sold
 		int items_left = N;
 		boolean sold = false;
@@ -410,7 +411,12 @@ public class Auctioneer implements Runnable {
 							// System.out.println("after bids were done!");
 
 							// TODO: lazy sync check agreement in winner
-
+							Item it = sync.agreeLazyWinner(index);
+							if (it != null) {
+								db.setItemCurrPrice(index, it.getCurrentPrice());
+								db.setItemHighestBidder(index, it.getHighestBidderName());
+							}
+							
 							// If no one wanted the item = no_holder then reduce price
 							if ((db.getItem(index).getHighestBidderName()).equals("no_holder")) {
 								counter++;
@@ -488,6 +494,14 @@ public class Auctioneer implements Runnable {
 
 	public void setN(int n) {
 		N = n;
+	}
+
+	public SyncServer getSync() {
+		return sync;
+	}
+
+	public void setSync(SyncServer sync) {
+		this.sync = sync;
 	}
 
 }
