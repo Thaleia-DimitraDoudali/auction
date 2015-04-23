@@ -37,7 +37,9 @@ public class LaunchServer {
 				args = line.split("\\s+");
 				int N = Integer.parseInt(args[0]);
 	        
-				//read items
+				//read items and store to the two databases
+				DBconnector db1 = new DBconnector(1);
+				DBconnector db2 = new DBconnector(2);
 				for (int i=1;i<=N;i++) {
 					line = br.readLine();
 					args = line.split("\\s+");
@@ -46,6 +48,8 @@ public class LaunchServer {
 					description = description.trim();
 					Item item = new Item(i,price,description);
 					bidItems.add(item);
+					db1.addItemToDB(i, price, description);
+					db2.addItemToDB(i, price, description);
 				}
 				
 			} catch (IOException e) {

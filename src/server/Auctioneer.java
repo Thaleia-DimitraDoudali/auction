@@ -11,8 +11,7 @@ import server.MessageServerHandler;
 import java.util.Timer;
 import java.util.TimerTask;
 
-//public class Auctioneer implements Runnable {
-public class Auctioneer extends Thread{
+public class Auctioneer implements Runnable {
 	
 	private int serverId;
 	private int bidderPort;

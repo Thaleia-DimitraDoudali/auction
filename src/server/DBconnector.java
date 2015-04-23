@@ -10,14 +10,15 @@ import java.sql.Statement;
 
 public class DBconnector {
 	
-	private static final String url = "jdbc:mysql://localhost/auction";
+	private String url = "jdbc:mysql://localhost/auction";
 	private static final String user = "root";
 	private static final String password = "root";
 	Connection connection = null;
 	Statement statement = null;
 
 	
-	public DBconnector() {
+	public DBconnector(int serverId) {
+		this.url += serverId;
 		connect();
 	}
 	
@@ -31,17 +32,16 @@ public class DBconnector {
         }
 	}
 	
-	public void addItemToDB(double initialPrice, String description) {
+	public void addItemToDB(int id, double initialPrice, String description) {
 		try {
 			if (connection == null)
 				connect();
 			statement = connection.createStatement();
 			String sql = String.format("INSERT INTO items set "
-					+ "initialPrice = '%.2f', description = '%s'", initialPrice, description);
+					+ "itemId = '%d', initialPrice = '%.2f', description = '%s'", id, initialPrice, description);
 			System.out.println(sql);
 			statement.execute(sql);
 		} catch (SQLException e) {
-			// Auto-generated catch block
 			e.printStackTrace();
 		}	
 	}
@@ -60,16 +60,4 @@ public class DBconnector {
 		}
 		return item;
 	}
-	
-
-	
-	
-	public static void main(String[] args) {
-		
-		DBconnector db = new DBconnector();
-		db.addItemToDB(10.0, "Alarm Clock");
-		//It will print one item, just to see that it works
-		db.getItem().print();
-	}
-
 }
