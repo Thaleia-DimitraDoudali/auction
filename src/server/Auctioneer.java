@@ -21,7 +21,7 @@ public class Auctioneer implements Runnable {
 	private List<Item> bidItems;
 	private int index;
 	private List<RegTableEntry> regTable = new ArrayList<RegTableEntry>();
-	private Item currentItem;
+	//currentItem will now be db.getItem(index+1)
 	private List<RegTableEntry> interestedBidders = new ArrayList<RegTableEntry>(); 
 	MessageServerHandler handler = new MessageServerHandler(this);
 	DBconnector db;
@@ -39,7 +39,6 @@ public class Auctioneer implements Runnable {
 		this.serverId = id;
 		this.setBidItems(bidItems);
 		this.L = L;
-		this.currentItem = new Item(0,0,"none_yet");
 		this.timer = new Timer();
 		this.bidderPort = port;
 		this.db = db;
@@ -58,18 +57,10 @@ public class Auctioneer implements Runnable {
 		}
 	}
 
-	public Item getCurrentItem() {
-		return currentItem;
-	}
-	
 	public int getServerId() {
 		return this.serverId;
 	}
 
-	public void setCurrentItem(Item currentItem) {
-		this.currentItem = currentItem;
-	}
-	
 	//Called at quit
 	public void removeFromRegTable(RegTableEntry entry) {
 		try {
@@ -106,13 +97,15 @@ public class Auctioneer implements Runnable {
 	}
 	//Called at bid amount
 	public int receiveBid(double amount, int itemId, RegTableEntry entry) {
-		if ((itemId == currentItem.getItemId()) && (interestedBidders.contains(entry))) {
-			if (currentItem.getCurrentPrice() < amount) {
-				currentItem.setCurrentPrice(amount);
-				db.setItemCurrPrice(index+1, amount);
-				currentItem.setHighestBidderName((entry.getBidder()).getBidderName());
-				db.setItemHighestBidder(index+1, (entry.getBidder()).getBidderName());
-				this.bidItems.set(index, currentItem);
+		//if ((itemId == db.getItem(index+1).getItemId()) && (interestedBidders.contains(entry))) {
+		if ((itemId == getIndex()+1) && (interestedBidders.contains(entry))) {
+			//if (db.getItem(index+1).getCurrentPrice() < amount) {
+			if (db.getItem(getIndex()+1).getCurrentPrice() < amount) {
+				//db.getItem(index+1).setCurrentPrice(amount);
+				db.setItemCurrPrice(getIndex()+1, amount);
+				//db.getItem(index+1).setHighestBidderName((entry.getBidder()).getBidderName());
+				db.setItemHighestBidder(getIndex()+1, (entry.getBidder()).getBidderName());
+				//this.bidItems.set(index, currentItem);
 				//send new_high_bid
 				this.newHighBid();
 				return 2;
@@ -127,27 +120,29 @@ public class Auctioneer implements Runnable {
 	public void bidItem() {
 		//send to all registered bidders
 		for (RegTableEntry entry : regTable) {
-			String message = "4 new_item" + ' ' + currentItem.getItemId() + ' ' + currentItem.getInitialPrice() + ' ' + currentItem.getDescription();
+			//String message = "4 new_item" + ' ' + db.getItem(index+1).getItemId() + ' ' + db.getItem(index+1).getInitialPrice() + ' ' + db.getItem(index+1).getDescription();
+			String message = "4 new_item" + ' ' + db.getItem(getIndex()+1).getItemId() + ' ' + db.getItem(getIndex()+1).getInitialPrice() + ' ' + db.getItem(getIndex()+1).getDescription();
 			handler.sendMessage(message, entry.getSocketChannel());
 		}
 	}
 	//start_bidding
 	public void startBidding() {
-		String message = "5 start_bidding" + ' ' + currentItem.getItemId();
+		//String message = "5 start_bidding" + ' ' + db.getItem(index+1).getItemId();
+		String message = "5 start_bidding" + ' ' + db.getItem(getIndex()+1).getItemId();
 		//send to all interested bidders
 		for (RegTableEntry entry : interestedBidders)
 			handler.sendMessage(message, entry.getSocketChannel());
 	}
 	//new_high_bid
 	public void newHighBid() {
-		String message = "6 new_high_bid" + ' ' + currentItem.getCurrentPrice() + ' ' + currentItem.getHighestBidderName() + ' ' + currentItem.getItemId();
+		String message = "6 new_high_bid" + ' ' + db.getItem(getIndex()+1).getCurrentPrice() + ' ' + db.getItem(getIndex()+1).getHighestBidderName() + ' ' + db.getItem(getIndex()+1).getItemId();
 		//send to all interested bidders
 		for (RegTableEntry entry : interestedBidders)
 			handler.sendMessage(message, entry.getSocketChannel());
 	}
 	//stop_bidding
 	public void stopBidding() {
-		String message = "7 stop_bidding" + ' ' + currentItem.getCurrentPrice() + ' ' + currentItem.getHighestBidderName() + ' ' + currentItem.getItemId();
+		String message = "7 stop_bidding" + ' ' + db.getItem(getIndex()+1).getCurrentPrice() + ' ' + db.getItem(getIndex()+1).getHighestBidderName() + ' ' + db.getItem(getIndex()+1).getItemId();
 		//send to all interested bidders
 		for (RegTableEntry entry : interestedBidders)
 			handler.sendMessage(message, entry.getSocketChannel());
@@ -286,18 +281,23 @@ public class Auctioneer implements Runnable {
 		//System.out.println("reached list!");
 		
 		//Iterate through the list of items until all items sold
-		while (this.bidItems.size() > 0) {	
-		  Iterator<Item> iterator = this.bidItems.iterator();
+		int items_left = bidItems.size();
+		boolean sold = false;
+		while (items_left > 0) {	
+		  //Iterator<Item> iterator = this.bidItems.iterator();
 		  //Index is the index of currentItem on bidItems list
 		  index = -1;
-		  while (iterator.hasNext()) {
-			currentItem = iterator.next();
-			index++;
+		  for (int i = 0; i < bidItems.size(); i++) {
+		   //currentItem = iterator.next();
+		   index++;			
+		   Item item = db.getItem(index+1);
+		   if (item.getSold() == 1)
+				sold = true;
+		   else
+				sold = false;
 			
-			Item item = db.getItem(index+1);
-			System.out.print("[" + serverId + "] ");
-			item.print();
-						
+		   if (!sold) { 
+			
 			counter=0;
 			interested=0;
 			interestedBidders.clear();
@@ -306,7 +306,7 @@ public class Auctioneer implements Runnable {
 			//Send new_item to registered bidders
 			this.bidItem();
 			
-			System.out.format("\n[" + serverId +"] New item: %s \n", currentItem.getDescription());
+			System.out.format("\n[" + serverId +"] New item: %s \n", db.getItem(getIndex()+1).getDescription());
 			
 			tEnd = System.currentTimeMillis();
 			tStart = System.currentTimeMillis();
@@ -402,9 +402,9 @@ public class Auctioneer implements Runnable {
 					//TODO: lazy sync check agreement in winner
 					
 					//If no one wanted the item = no_holder then reduce price
-					if ((currentItem.getHighestBidderName()).equals("no_holder")){
-						currentItem.setCurrentPrice(0.9*currentItem.getCurrentPrice());
-						this.bidItems.set(index, currentItem);
+					if ((db.getItem(getIndex()+1).getHighestBidderName()).equals("no_holder")){
+						db.setItemCurrPrice(getIndex()+1, 0.9*db.getItem(getIndex()+1).getCurrentPrice());
+						//this.bidItems.set(index, currentItem);
 						counter++;
 						//Reduced price, check if you should send it or not
 						// if all bidders have quit
@@ -418,8 +418,8 @@ public class Auctioneer implements Runnable {
 								offer_is_on=0;
 								this.stopBidding();
 								//At this point the item will get back to auction later on, so initialPrice becomes currentPrice
-								currentItem.setInitialPrice(currentItem.getCurrentPrice());
-								this.bidItems.set(index, currentItem);
+								db.setItemInitPrice(getIndex()+1, db.getItem(getIndex()+1).getCurrentPrice());
+								//this.bidItems.set(index, currentItem);
 								//System.out.println("Value can't drop more! Moving on to next item!");
 							}
 							else {
@@ -435,8 +435,10 @@ public class Auctioneer implements Runnable {
 						this.stopBidding();
 						offer_is_on = 0;
 						//Remove current item from bidItems
-						iterator.remove();
-				        index--;
+						//iterator.remove();
+				        //index--;
+						db.setItemSold(index+1);
+				        items_left--;
 						//System.out.println("item sold! ");
 					}
 				}
@@ -447,6 +449,7 @@ public class Auctioneer implements Runnable {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+		   }
 		  }
 		} //All items sold!
 		System.out.println("[" + serverId +"] Auction finished!");		
@@ -459,6 +462,14 @@ public class Auctioneer implements Runnable {
 		//TODO: terminate auction, close all channels, if user quited then his channel closed
 		this.auctionComplete();
 		timer.cancel();
+	}
+
+	public int getIndex() {
+		return index;
+	}
+
+	public void setIndex(int index) {
+		this.index = index;
 	}
 
 }

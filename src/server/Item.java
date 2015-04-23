@@ -10,6 +10,7 @@ public class Item{
 	private String description;
 	private double currentPrice;
 	private String highestBidderName; 
+	private int sold;
 	
 	//Constructor
 	public Item(int itemId, double initialPrice, String description) {
@@ -17,7 +18,8 @@ public class Item{
 		this.setInitialPrice(initialPrice);
 		this.setDescription(description);
 		this.setCurrentPrice(initialPrice);
-		this.setHighestBidderName("no_holder");				 
+		this.setHighestBidderName("no_holder");
+		this.setSold(0);
 	}
 	
 	public void print() {
@@ -76,6 +78,14 @@ public class Item{
 		return new ItemIterator();
 	}
 	
+	public int getSold() {
+		return sold;
+	}
+
+	public void setSold(int sold) {
+		this.sold = sold;
+	}
+
 	class ItemIterator implements Iterator<Item> {
 		int currentIndex = 0;
 

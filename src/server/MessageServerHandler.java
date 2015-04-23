@@ -70,7 +70,7 @@ public class MessageServerHandler {
 		//interested
 		case '1':
 			args = message.split("\\s+");
-			if (auctioneer.getCurrentItem().getItemId() == Double.parseDouble(args[2])) {
+			if ((auctioneer.getIndex()+1) == Double.parseDouble(args[2])) {
 				bidder = new Bidder(args[3],0,null);
 				RegTableEntry newInterest = new RegTableEntry(client, bidder); 
 				auctioneer.addToInterestedBidders(newInterest);

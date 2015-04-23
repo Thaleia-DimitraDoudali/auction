@@ -44,7 +44,8 @@ public class DBconnector {
 	    		+ " initialPrice decimal(10,3),"
 	    		+ "currentPrice decimal(10,3),"
 	    		+ "description VARCHAR(200), "
-	    		+ "highestBidderName VARCHAR(200));" ;
+	    		+ "highestBidderName VARCHAR(200),"
+	    		+ "sold INT(1));" ;
 			statement.executeUpdate(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -69,9 +70,24 @@ public class DBconnector {
 			statement = connection.createStatement();
 			String sql = String.format("INSERT INTO items set "
 					+ "itemId = '%d', initialPrice = '%.2f', currentPrice = '%.2f', highestBidderName = '%s', "
-					+ "description = '%s'", item.getItemId(), item.getInitialPrice(), item.getCurrentPrice(),
-					item.getHighestBidderName(), item.getDescription());
+					+ "description = '%s', sold = '%d'", item.getItemId(), item.getInitialPrice(), item.getCurrentPrice(),
+					item.getHighestBidderName(), item.getDescription(), 0);
 			//System.out.println("[" + serverId + "]" + sql);
+			statement.execute(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
+	}
+	
+	public void setItemSold(int id) {
+		try {
+			if (connection == null)
+				connect();
+			statement = connection.createStatement();
+			String sql = String.format("UPDATE items set "
+					+ "sold = 1 WHERE itemId = '%d' LIMIT 1;",
+					id);
+			System.out.println("[" + serverId + "]" + sql);
 			statement.execute(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -85,6 +101,21 @@ public class DBconnector {
 			statement = connection.createStatement();
 			String sql = String.format("UPDATE items set "
 					+ "currentPrice = '%.2f' WHERE itemId = '%d' LIMIT 1;",
+					price, id);
+			System.out.println("[" + serverId + "]" + sql);
+			statement.execute(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}	
+	}
+	
+	public void setItemInitPrice(int id, double price) {
+		try {
+			if (connection == null)
+				connect();
+			statement = connection.createStatement();
+			String sql = String.format("UPDATE items set "
+					+ "initialPrice = '%.2f' WHERE itemId = '%d' LIMIT 1;",
 					price, id);
 			System.out.println("[" + serverId + "]" + sql);
 			statement.execute(sql);
@@ -118,6 +149,7 @@ public class DBconnector {
 				item = new Item(rs.getInt("itemId"), rs.getDouble("initialPrice"), rs.getString("description"));
 				item.setCurrentPrice(rs.getDouble("currentPrice"));
 				item.setHighestBidderName(rs.getString("highestBidderName"));
+				item.setSold(rs.getInt("sold"));
 			}
 		} catch (SQLException e) {
 			//Auto-generated catch block
