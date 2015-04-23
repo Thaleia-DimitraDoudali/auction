@@ -302,6 +302,14 @@ public class Auctioneer implements Runnable {
 					interestedBidders.clear();
 					bidded = 0;
 
+					//synchronize
+					sync.reset();
+					boolean wait = true;
+					while (wait) {
+						wait = sync.proceed(serverId);
+						System.out.println("[" + serverId + "] Waiting...");
+					}
+					
 					// Send new_item to registered bidders
 					this.bidItem();
 

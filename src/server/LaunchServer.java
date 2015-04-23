@@ -54,9 +54,11 @@ public class LaunchServer {
 		SyncServer sync = new SyncServer(db1, db2);
 		
 		//Auctioneer 1
-		(new Thread(new Auctioneer(1, L / 1000, N, bidderPort, db1, sync))).start();
+		Thread t1 = (new Thread(new Auctioneer(1, L / 1000, N, bidderPort, db1, sync)));
+		t1.start();
 		//Auctioneer 2
-		(new Thread(new Auctioneer(2, L / 1000, N, bidderPort + 1, db2, sync))).start();
+		Thread t2 = (new Thread(new Auctioneer(2, L / 1000, N, bidderPort + 1, db2, sync)));
+		t2.start();
 
 	}
 
