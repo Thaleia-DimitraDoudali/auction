@@ -90,10 +90,14 @@ public class Auctioneer implements Runnable {
 				db.setItemCurrPrice(index, amount);
 				db.setItemHighestBidder(index,
 						(entry.getBidder()).getBidderName());
-				// send new_high_bid
+				//TODO: Before sending new_high_bid, we have to check with the other DB as well
+				sync.syncBids(index);
+				//send new_high_bid
 				this.newHighBid();
 				return 2;
 			}
+			// send new_high_bid -- moved it here as well
+			this.newHighBid();
 		}
 		return 10;
 	}
@@ -126,6 +130,7 @@ public class Auctioneer implements Runnable {
 				+ db.getItem(index).getCurrentPrice() + ' '
 				+ db.getItem(index).getHighestBidderName() + ' '
 				+ db.getItem(index).getItemId();
+		System.out.println("[" + serverId + "] " + message);
 		// send to all interested bidders
 		for (RegTableEntry entry : interestedBidders)
 			handler.sendMessage(message, entry.getSocketChannel());
@@ -307,7 +312,7 @@ public class Auctioneer implements Runnable {
 					boolean wait = true;
 					while (wait) {
 						wait = sync.proceed(serverId);
-						System.out.println("[" + serverId + "] Waiting...");
+						System.err.println("[" + serverId + "] Waiting...");
 					}
 					
 					// Send new_item to registered bidders
@@ -419,12 +424,12 @@ public class Auctioneer implements Runnable {
 							// System.out.println("after bids were done!");
 
 							// TODO: lazy sync check agreement in winner
-							Item it = sync.agreeLazyWinner(index);
+						/*	Item it = sync.agreeWinner(index);
 							if (it != null) {
 								db.setItemCurrPrice(index, it.getCurrentPrice());
 								db.setItemHighestBidder(index, it.getHighestBidderName());
 							}
-							
+							*/
 							// If no one wanted the item = no_holder then reduce price
 							if ((db.getItem(index).getHighestBidderName()).equals("no_holder")) {
 								counter++;

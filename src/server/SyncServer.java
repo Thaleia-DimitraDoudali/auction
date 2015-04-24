@@ -27,8 +27,27 @@ public class SyncServer {
 		proceed2 = 0;
 	}
 	
+	public void syncBids(int itemId) {
+		Item item1 = db1.getItem(itemId);
+		Item item2 = db2.getItem(itemId);
+
+		if ((item1.getCurrentPrice() < item2.getCurrentPrice()) || 
+				(item1.getHighestBidderName().equals("no_holder") &&
+						!item2.getHighestBidderName().equals("no_holder"))) { //item2 wins, change item1
+			db1.setItemCurrPrice(itemId, item2.getCurrentPrice());
+			db1.setItemHighestBidder(itemId, item2.getHighestBidderName());
+			return ;
+		} else if ((item2.getCurrentPrice() < item1.getCurrentPrice()) || 
+				(item2.getHighestBidderName().equals("no_holder") &&
+						!item1.getHighestBidderName().equals("no_holder"))) { //item1 wins, change item2
+			db2.setItemCurrPrice(itemId, item1.getCurrentPrice());
+			db2.setItemHighestBidder(itemId, item1.getHighestBidderName());
+			return ;
+		} 
+	}
+	
 	//Checks the other database in order to compare the item in both databases
-	public Item agreeLazyWinner(int itemId) {		
+	public Item agreeWinner(int itemId) {		
 		
 		Item item1 = db1.getItem(itemId);
 		Item item2 = db2.getItem(itemId);
@@ -40,6 +59,7 @@ public class SyncServer {
 		} else if (item1.getHighestBidderName().equals(item2.getHighestBidderName())) { //no_holder
 			return null;
 		}
+		//TODO: what if both bid the same amount
 		return null;
 	}
 
