@@ -100,6 +100,8 @@ public class Bidder implements Runnable {
 	//Decodes messages entered in terminal - returns true if quit
 	public boolean decodeTerminal(String s) {
 		if (s.equals("list_high_bid")) {
+			//TODO: list_high_bid can be inconsistent when database changed due to a bidder on the 
+			//other server, and our bidder has not done anything			
 			System.out.format(" Current highest bid is $%.2f by %s \n>> ", item.getCurrentPrice(), item.getHighestBidderName());
 			return false;
 		}

@@ -10,6 +10,7 @@ public class SyncServer {
 		this.db2 = db2;
 	}
 	
+	//Custom barrier function
 	public boolean proceed(int serverId) {
 		if (serverId == 1)
 			proceed1 = 1;
@@ -27,6 +28,7 @@ public class SyncServer {
 		proceed2 = 0;
 	}
 	
+	//On new_high_bid sync the 2 databases to have one consistent item
 	public void syncBids(int itemId) {
 		Item item1 = db1.getItem(itemId);
 		Item item2 = db2.getItem(itemId);
