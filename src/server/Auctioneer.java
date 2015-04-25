@@ -150,9 +150,7 @@ public class Auctioneer implements Runnable {
 				+ db.getItem(index).getItemId();
 		System.out.println("[" + serverId + "] " + message);
 		// send to all interested bidders
-		//TODO: also send to interested bidders of the other server
-		for (RegTableEntry entry : interestedBidders)
-			handler.sendMessage(message, entry.getSocketChannel());
+		sync.sendToAllInterested(message);
 	}
 
 	// stop_bidding
@@ -552,6 +550,22 @@ public class Auctioneer implements Runnable {
 
 	public void setHostname(InetAddress hostname) {
 		this.hostname = hostname;
+	}
+
+	public List<RegTableEntry> getInterestedBidders() {
+		return interestedBidders;
+	}
+
+	public void setInterestedBidders(List<RegTableEntry> interestedBidders) {
+		this.interestedBidders = interestedBidders;
+	}
+
+	public MessageServerHandler getHandler() {
+		return handler;
+	}
+
+	public void setHandler(MessageServerHandler handler) {
+		this.handler = handler;
 	}
 
 }

@@ -3,7 +3,8 @@ package server;
 public class SyncServer {
 
 	private DBconnector db1, db2;
-	int proceed1 = -1, proceed2 = 0;
+	private int proceed1 = -1, proceed2 = 0;
+	private Auctioneer auct1, auct2;			
 	
 	public SyncServer(DBconnector db1, DBconnector db2) {
 		this.db1 = db1;
@@ -96,6 +97,13 @@ public class SyncServer {
 		return false;
 	}
 	
+	public void sendToAllInterested (String message) {
+		for (RegTableEntry entry1 : auct1.getInterestedBidders())
+			auct1.getHandler().sendMessage(message, entry1.getSocketChannel());
+		for (RegTableEntry entry2 : auct2.getInterestedBidders())
+			auct1.getHandler().sendMessage(message, entry2.getSocketChannel());
+	}
+	
 	//Getters - Setters
 	public DBconnector getDb2() {
 		return db2;
@@ -111,6 +119,22 @@ public class SyncServer {
 
 	public void setDb1(DBconnector db1) {
 		this.db1 = db1;
+	}
+
+	public Auctioneer getAuct2() {
+		return auct2;
+	}
+
+	public void setAuct2(Auctioneer auct2) {
+		this.auct2 = auct2;
+	}
+
+	public Auctioneer getAuct1() {
+		return auct1;
+	}
+
+	public void setAuct1(Auctioneer auct1) {
+		this.auct1 = auct1;
 	}
 	
 }

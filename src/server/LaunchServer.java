@@ -54,10 +54,14 @@ public class LaunchServer {
 		SyncServer sync = new SyncServer(db1, db2);
 		
 		//Auctioneer 1
-		Thread t1 = (new Thread(new Auctioneer(1, L / 1000, N, bidderPort, db1, sync)));
+		Auctioneer auct1 = new Auctioneer(1, L / 1000, N, bidderPort, db1, sync);
+		sync.setAuct1(auct1);
+		Thread t1 = (new Thread(auct1));
 		t1.start();
 		//Auctioneer 2
-		Thread t2 = (new Thread(new Auctioneer(2, L / 1000, N, bidderPort + 1, db2, sync)));
+		Auctioneer auct2 = new Auctioneer(2, L / 1000, N, bidderPort + 1, db2, sync);
+		sync.setAuct2(auct2);
+		Thread t2 = (new Thread(auct2));
 		t2.start();
 
 	}
