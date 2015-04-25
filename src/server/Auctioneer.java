@@ -25,7 +25,8 @@ public class Auctioneer implements Runnable {
 	private MessageServerHandler handler = new MessageServerHandler(this);
 	private DBconnector db;
 	private SyncServer sync;
-	InetAddress hostname;
+	private InetAddress hostname;
+	private ServerSocketChannel ssc;
 
 	// Timer that unblocks selector.select()
 	class WakeUp extends TimerTask {
@@ -149,6 +150,7 @@ public class Auctioneer implements Runnable {
 				+ db.getItem(index).getItemId();
 		System.out.println("[" + serverId + "] " + message);
 		// send to all interested bidders
+		//TODO: also send to interested bidders of the other server
 		for (RegTableEntry entry : interestedBidders)
 			handler.sendMessage(message, entry.getSocketChannel());
 	}
@@ -183,6 +185,12 @@ public class Auctioneer implements Runnable {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+		//Also close server socket channel, so that no new bidders can connect
+		try {
+			ssc.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// What an auctioneer thread does
@@ -192,7 +200,7 @@ public class Auctioneer implements Runnable {
 		System.out.println("[" + serverId + "] Auctioneer up and running!");
 		
 		// set up connection
-		ServerSocketChannel ssc = null;
+		ssc = null;
 		InetSocketAddress isa;
 		selector = null;
 
