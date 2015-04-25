@@ -65,7 +65,15 @@ public class SyncServer {
 		return null;
 	}
 
-	
+	//Check bidders for duplicate in the other server's DB
+	public boolean checkDuplicate(int serverId, String name) {
+		if (serverId == 1) {
+			return db2.hasBidder(name);
+		} else if (serverId == 2) {
+			return db1.hasBidder(name);
+		}
+		return false;
+	}
 	
 	//Getters - Setters
 	public DBconnector getDb2() {

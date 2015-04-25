@@ -78,6 +78,12 @@ public class Auctioneer implements Runnable {
 				break;
 			}
 		}
+		//Check also the bidders of the other server
+		if (sync.checkDuplicate(serverId, entry.getBidder().getBidderName())) {
+			String message = "9 duplicate_name Please abort";
+			handler.sendMessage(message, entry.getSocketChannel());
+			return;
+		}
 		if (flag == 0) {
 			regTable.add(entry);
 			db.addBidderToDB(entry);

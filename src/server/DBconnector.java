@@ -72,6 +72,8 @@ public class DBconnector {
 		}	    	
 	}
 	
+	//---------------Bidders------------------
+	
 	public void addBidderToDB(RegTableEntry entry) {
 		try {
 			if (connection == null)
@@ -100,6 +102,24 @@ public class DBconnector {
 			e.printStackTrace();
 		}				
 	}
+	
+	public boolean hasBidder(String name) {
+		try {
+			statement = connection.createStatement();
+			String sql = String.format("SELECT * FROM bidders WHERE name = '%s'", name);
+			ResultSet rs = statement.executeQuery(sql);
+			if (rs.next()) {
+				//bidder found
+				return true;
+			}
+		} catch (SQLException e) {
+			//Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	//-----------------Items----------------------
 	
 	public void addItemToDB(Item item) {
 		try {
