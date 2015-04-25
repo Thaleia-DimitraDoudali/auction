@@ -32,6 +32,9 @@ public class SyncServer {
 	public void syncBids(int itemId) {
 		Item item1 = db1.getItem(itemId);
 		Item item2 = db2.getItem(itemId);
+		
+		item1.print();
+		item2.print();
 
 		if ((item1.getCurrentPrice() < item2.getCurrentPrice()) || 
 				(item1.getHighestBidderName().equals("no_holder") &&
@@ -46,6 +49,24 @@ public class SyncServer {
 			db2.setItemHighestBidder(itemId, item1.getHighestBidderName());
 			return ;
 		} 
+	}
+	
+	public void syncInitPrice(int serverId, int itemId, double price) {
+		if (serverId == 1) {
+			db2.setItemInitPrice(itemId, price);
+		} else if (serverId == 2) {
+			db1.setItemInitPrice(itemId, price);
+		}
+		return;
+	}
+	
+	public void syncItemSold(int serverId, int itemId) {
+		if (serverId == 1) {
+			db2.setItemSold(itemId);
+		} else if (serverId == 2) {
+			db1.setItemSold(itemId);
+		}
+		return;
 	}
 	
 	//Checks the other database in order to compare the item in both databases

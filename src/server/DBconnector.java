@@ -128,7 +128,7 @@ public class DBconnector {
 			statement = connection.createStatement();
 			String sql = String.format("INSERT INTO items set "
 					+ "itemId = '%d', initialPrice = '%.2f', currentPrice = '%.2f', highestBidderName = '%s', "
-					+ "description = '%s', sold = '%d'", item.getItemId(), item.getInitialPrice(), item.getCurrentPrice(),
+					+ "description = \"%s\", sold = '%d'", item.getItemId(), item.getInitialPrice(), item.getCurrentPrice(),
 					item.getHighestBidderName(), item.getDescription(), 0);
 			//System.out.println("[" + serverId + "]" + sql);
 			statement.execute(sql);

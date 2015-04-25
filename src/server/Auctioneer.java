@@ -455,10 +455,12 @@ public class Auctioneer implements Runnable {
 										// At this point the item will get back to auction later on, so initialPrice
 										// becomes currentPrice
 										db.setItemInitPrice(index, db.getItem(index).getCurrentPrice());
+										sync.syncInitPrice(serverId, index, db.getItem(index).getCurrentPrice());
 										// System.out.println("Value can't drop more! Moving on to next item!");
 									} else {
 										// Send new reduced price
-										db.setItemCurrPrice(index, 0.9 * db.getItem(index).getCurrentPrice());
+										double reducedPrice = 0.9 * db.getItem(index).getCurrentPrice();
+										db.setItemCurrPrice(index, reducedPrice);
 										this.newHighBid();
 										// System.out.println("10 down! ");
 									}
@@ -471,6 +473,7 @@ public class Auctioneer implements Runnable {
 								this.stopBidding();
 								offer_is_on = 0;
 								db.setItemSold(index);
+								sync.syncItemSold(serverId, index);
 								items_left--;
 								// System.out.println("item sold! ");
 							}
