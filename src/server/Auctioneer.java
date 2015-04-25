@@ -125,10 +125,10 @@ public class Auctioneer implements Runnable {
 	// new_item
 	public void bidItem() {
 		// send to all registered bidders
+		String message = "4 new_item" + ' ' + db.getItem(index).getItemId()
+				+ ' ' + db.getItem(index).getInitialPrice() + ' '
+				+ db.getItem(index).getDescription();
 		for (RegTableEntry entry : regTable) {
-			String message = "4 new_item" + ' ' + db.getItem(index).getItemId()
-					+ ' ' + db.getItem(index).getInitialPrice() + ' '
-					+ db.getItem(index).getDescription();
 			handler.sendMessage(message, entry.getSocketChannel());
 		}
 	}
@@ -160,8 +160,9 @@ public class Auctioneer implements Runnable {
 				+ db.getItem(index).getHighestBidderName() + ' '
 				+ db.getItem(index).getItemId();
 		// send to all interested bidders
-		for (RegTableEntry entry : interestedBidders)
-			handler.sendMessage(message, entry.getSocketChannel());
+		sync.sendToAllInterested(message);
+		//for (RegTableEntry entry : interestedBidders)
+			//handler.sendMessage(message, entry.getSocketChannel());
 	}
 
 	// auction_complete
@@ -324,13 +325,13 @@ public class Auctioneer implements Runnable {
 					bidded = 0;
 
 					//synchronize
-					sync.reset();
+				/*	sync.reset();
 					boolean wait = true;
 					while (wait) {
 						wait = sync.proceed(serverId);
 						System.err.println("[" + serverId + "] Waiting...");
 					}
-					
+					*/
 					// Send new_item to registered bidders
 					this.bidItem();
 
@@ -558,6 +559,14 @@ public class Auctioneer implements Runnable {
 
 	public void setInterestedBidders(List<RegTableEntry> interestedBidders) {
 		this.interestedBidders = interestedBidders;
+	}
+
+	public List<RegTableEntry> getRegTable() {
+		return regTable;
+	}
+
+	public void setRegTable(List<RegTableEntry> regTable) {
+		this.regTable = regTable;
 	}
 
 	public MessageServerHandler getHandler() {
