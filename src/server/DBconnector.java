@@ -22,8 +22,8 @@ public class DBconnector {
 		this.serverId = serverId;
 		this.url += serverId;
 		connect();
-		dropTable();
-		createTable();
+		dropTables();
+		createTables();
 	}
 	
 	public void connect() {
@@ -36,8 +36,8 @@ public class DBconnector {
         }
 	}
 	
-	public void createTable() {
-		System.out.println("[" + serverId + "] Creating table in given database...");
+	public void createTables() {
+		System.out.println("[" + serverId + "] Creating tables in given database...");
 	    try {
 	    	statement = connection.createStatement();	      
 	    	String sql = "CREATE TABLE items(itemId INT NOT NULL PRIMARY KEY,"
@@ -47,20 +47,58 @@ public class DBconnector {
 	    		+ "highestBidderName VARCHAR(200),"
 	    		+ "sold INT(1));" ;
 			statement.executeUpdate(sql);
+	    	statement = connection.createStatement();
+	    	sql = "CREATE TABLE bidders ("
+	    			+ "name VARCHAR(200) NOT NULL PRIMARY KEY, "
+	    			+ "port INT, "
+	    			+ "hostname VARCHAR(200));";
+			statement.executeUpdate(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 	}
 	
-	public void dropTable() {
-		System.out.println("[" + serverId + "] Droping table in given database...");
+	public void dropTables() {
+		System.out.println("[" + serverId + "] Droping tables in given database...");
 	    try {
 	    	statement = connection.createStatement();	      
 	    	String sql = "DROP TABLE items;";
 	    	statement.executeUpdate(sql);
+	    	statement = connection.createStatement();	      
+	    	sql = "DROP TABLE bidders;";
+	    	statement.executeUpdate(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}	    	
+	}
+	
+	public void addBidderToDB(RegTableEntry entry) {
+		try {
+			if (connection == null)
+				connect();
+			statement = connection.createStatement();
+			String sql = String.format("INSERT INTO bidders set "
+					+ "name = '%s', port = '%d', hostname = '%sf'", 
+					entry.getBidder().getBidderName(), entry.getBidder().getPort(), 
+					entry.getBidder().getHostName().toString());
+			//System.out.println("[" + serverId + "]" + sql);
+			statement.execute(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}		
+	}
+	
+	public void rmBidderFromDB(RegTableEntry entry) {
+		try {
+			if (connection == null)
+				connect();
+			statement = connection.createStatement();
+			String sql = String.format("DELETE FROM bidders WHERE name = '%s';", entry.getBidder().getBidderName());
+			//System.out.println("[" + serverId + "]" + sql);
+			statement.execute(sql);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}				
 	}
 	
 	public void addItemToDB(Item item) {

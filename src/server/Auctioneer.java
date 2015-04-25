@@ -25,6 +25,7 @@ public class Auctioneer implements Runnable {
 	private MessageServerHandler handler = new MessageServerHandler(this);
 	private DBconnector db;
 	private SyncServer sync;
+	InetAddress hostname;
 
 	// Timer that unblocks selector.select()
 	class WakeUp extends TimerTask {
@@ -43,6 +44,12 @@ public class Auctioneer implements Runnable {
 		this.timer = new Timer();
 		this.bidderPort = port;
 		this.db = db;
+		try {
+			// Now it's the local host IPv4, it could also be a VM IPv4.
+			this.hostname = InetAddress.getLocalHost();
+		} catch (UnknownHostException e1) {
+			e1.printStackTrace();
+		}
 	}
 
 	// Called at quit
@@ -52,8 +59,10 @@ public class Auctioneer implements Runnable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		if (regTable.remove(entry))
+		if (regTable.remove(entry)) {
 			System.out.println("[" + serverId + "] Entry removed");
+			db.rmBidderFromDB(entry);
+		}
 	}
 
 	// Called at connect
@@ -69,8 +78,10 @@ public class Auctioneer implements Runnable {
 				break;
 			}
 		}
-		if (flag == 0)
+		if (flag == 0) {
 			regTable.add(entry);
+			db.addBidderToDB(entry);
+		}
 	}
 
 	// Called at quit
@@ -178,13 +189,6 @@ public class Auctioneer implements Runnable {
 		ServerSocketChannel ssc = null;
 		InetSocketAddress isa;
 		selector = null;
-		InetAddress hostname = null;
-		try {
-			// Now it's the local host IPv4, it could also be a VM IPv4.
-			hostname = InetAddress.getLocalHost();
-		} catch (UnknownHostException e1) {
-			e1.printStackTrace();
-		}
 
 		// cat auct_name so that the bidder can find out the ip and port of the
 		// auctioneer
@@ -515,6 +519,22 @@ public class Auctioneer implements Runnable {
 
 	public void setSync(SyncServer sync) {
 		this.sync = sync;
+	}
+
+	public int getBidderPort() {
+		return bidderPort;
+	}
+
+	public void setBidderPort(int bidderPort) {
+		this.bidderPort = bidderPort;
+	}
+
+	public InetAddress getHostname() {
+		return hostname;
+	}
+
+	public void setHostname(InetAddress hostname) {
+		this.hostname = hostname;
 	}
 
 }

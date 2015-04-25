@@ -18,5 +18,9 @@
 	description VARCHAR(200), 
 	highestBidderName VARCHAR(200),
 	sold INT(1));
+   mysql > CREATE TABLE bidders (
+   	name VARCHAR(200) NOT NULL PRIMARY KEY,
+   	port INT,
+   	hostname VARCHAR(200));
 10. Open 2 terminals and do 6,7,8,9 at both
 11. mysql> select * from items; (at each terminal, after running server.DBconnector.java, you can see what changed)
