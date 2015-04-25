@@ -71,7 +71,7 @@ public class MessageServerHandler {
 		case '1':
 			args = message.split("\\s+");
 			if ((auctioneer.getIndex()) == Double.parseDouble(args[2])) {
-				bidder = new Bidder(args[2], auctioneer.getBidderPort(), auctioneer.getHostname());
+				bidder = new Bidder(args[3], auctioneer.getBidderPort(), auctioneer.getHostname());
 				RegTableEntry newInterest = new RegTableEntry(client, bidder); 
 				auctioneer.addToInterestedBidders(newInterest);
 				mtype = 1;
@@ -81,7 +81,7 @@ public class MessageServerHandler {
 		//bid amount
 		case '2':
 			args = message.split("\\s+");
-			bidder = new Bidder(args[2], auctioneer.getBidderPort(), auctioneer.getHostname());
+			bidder = new Bidder(args[4], auctioneer.getBidderPort(), auctioneer.getHostname());
 			RegTableEntry tempEntry = new RegTableEntry(client, bidder);
 			mtype = auctioneer.receiveBid(Double.parseDouble(args[2]), Integer.parseInt(args[3]), tempEntry);
 			break;
