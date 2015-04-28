@@ -145,7 +145,7 @@ public class DBconnector {
 			String sql = String.format("UPDATE items set "
 					+ "sold = 1 WHERE itemId = '%d' LIMIT 1;",
 					id);
-			System.out.println("[" + serverId + "]" + sql);
+			//System.out.println("[" + serverId + "]" + sql);
 			statement.execute(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -160,7 +160,7 @@ public class DBconnector {
 			String sql = String.format("UPDATE items set "
 					+ "currentPrice = '%.2f' WHERE itemId = '%d' LIMIT 1;",
 					price, id);
-			System.out.println("[" + serverId + "]" + sql);
+			//System.out.println("[" + serverId + "]" + sql);
 			statement.execute(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -175,7 +175,7 @@ public class DBconnector {
 			String sql = String.format("UPDATE items set "
 					+ "initialPrice = '%.2f' WHERE itemId = '%d' LIMIT 1;",
 					price, id);
-			System.out.println("[" + serverId + "]" + sql);
+			//System.out.println("[" + serverId + "]" + sql);
 			statement.execute(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -190,7 +190,7 @@ public class DBconnector {
 			String sql = String.format("UPDATE items set "
 					+ "highestBidderName = '%s' WHERE itemId = '%d' LIMIT 1;",
 					name, id);
-			System.out.println("[" + serverId + "]" + sql);
+			//System.out.println("[" + serverId + "]" + sql);
 			statement.execute(sql);
 		} catch (SQLException e) {
 			e.printStackTrace();

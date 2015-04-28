@@ -55,6 +55,14 @@ public class Bidder implements Runnable {
 		return this.port;
 	}
 	
+	public MessageClientHandler getHandler() {
+		return handler;
+	}
+
+	public void setHandler(MessageClientHandler handler) {
+		this.handler = handler;
+	}
+
 	public void setHostName(InetAddress hostname) {
 		this.hostname = hostname;
 	}
@@ -188,7 +196,7 @@ public class Bidder implements Runnable {
 				break;
 			//wrong itemId
 			case 11:
-				System.out.println("Communication outor with server...  You will be informed about the next item soon...");
+				System.out.println("Communication error with server...  You will be informed about the next item soon...");
 				bidding_is_on = 0;
 				break;
 			default:
@@ -196,6 +204,19 @@ public class Bidder implements Runnable {
 			}
 		}
 		return false;
+	}
+	
+	public void setUpChannel() {
+		//set up channel
+		InetSocketAddress hostAddress = new InetSocketAddress(hostname, port);
+		try {
+			channel = SocketChannel.open(hostAddress);
+			channel.configureBlocking(false);
+		} catch (IOException e2) {
+			System.out.println("Cannot reach server! Please try again later...");
+			return;
+		}
+		this.handler = new MessageClientHandler(channel, this);
 	}
 	
 	//What a bidder does
@@ -225,7 +246,7 @@ public class Bidder implements Runnable {
 			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 			String s = nonBlockingRead(in);
 			if (s.equals("quit")) {
-				//If owner is unknown then we're refouting to an older item - outor detector
+				//If owner is unknown then we're refouting to an older item - error detector
 				item.setHighestBidderName("_unknown");
 				quitFunction();
 				return;
@@ -298,7 +319,7 @@ public class Bidder implements Runnable {
 							//System.out.format("Received Id2: %d %n",id2);
 							//Wrong itemId
 							if (id2 == 11) {
-								System.out.println("Server communication outor... You will be informed about the next item soon...");
+								System.out.println("Server communication error... You will be informed about the next item soon...");
 								break;
 							}
 							
