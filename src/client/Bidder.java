@@ -87,6 +87,22 @@ public class Bidder implements Runnable {
 			i++;
 		}
 	}
+	public void printItemsBought(BufferedWriter bw) throws IOException {
+		
+		bw.write("The items you bought are:\n");
+		int i = 1;
+		if (itemsBought.size()==0) {
+			bw.write(" None\n");
+			return;
+		}
+		for (Item item: itemsBought) {
+			double amount = item.getCurrentPrice();
+			String description = item.getDescription();
+			String output = String.format(" %d) %s \n    Price: $%.2f\n", i, description, amount);
+			bw.write(output);
+			i++;
+		}
+	}
 	
 	//Executes quit sequence
 	public void quitFunction() {

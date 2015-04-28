@@ -16,7 +16,6 @@ public class BidThread implements Runnable {
 	public void run() {
 		// Send bid sleep for frequency sec
 		for (int i = 0; i < bidder.getBids().size(); i++) {
-			System.out.println(bidder.getBids().get(i));
 			bdr.getHandler().sendBid(bdr.getItem(), Double.parseDouble(bidder.getBids().get(i)));
 			//sleep
 			try {

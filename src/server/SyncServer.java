@@ -45,9 +45,6 @@ public class SyncServer {
 	public void syncBids(int itemId) {
 		Item item1 = db1.getItem(itemId);
 		Item item2 = db2.getItem(itemId);
-		
-		item1.print();
-		item2.print();
 
 		if ((item1.getCurrentPrice() < item2.getCurrentPrice()) || 
 				(item1.getHighestBidderName().equals("no_holder") &&

@@ -1,5 +1,9 @@
 package driver;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -18,7 +22,7 @@ public class LaunchDriver {
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws IOException {
 		
 		//Parse configuration file
 		ParseXML parser = new ParseXML(args[0]);
@@ -83,30 +87,51 @@ public class LaunchDriver {
 			e.printStackTrace();
 		}
 		
-		boolean auction_is_on = true;
-		int j = 0;
-		while (auction_is_on){
-			j++;
+		//Prepare each client's output file
+		ArrayList<BufferedWriter> bw = new ArrayList<BufferedWriter>();
+		for (int i = 0; i < bidders.size(); i++) {
+			BidderXML bXML = biddersXML.get(i);
+			try {
+				// The output file will be created at the current directory
+				String workingDir = System.getProperty("user.dir");
+				File file = new File(workingDir + "/output_" + bXML.getName());
+				if (!file.exists()) {
+					file.createNewFile();
+				}
+				FileWriter fw = new FileWriter(file.getAbsoluteFile());
+				bw.add(new BufferedWriter(fw));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		}
+		
+		int auction_is_on = 0;
+		while (auction_is_on < bidders.size()){
 			for (int i = 0; i < bidders.size(); i++) {
 				Bidder b = bidders.get(i);
 				BidderXML bXML = biddersXML.get(i);
-				if (j == 1)
-					bXML.print();
 				
 				int id = b.getHandler().receiveMessage();
 				//new_item
 				if (id == 4) {
+					String output = String.format("\nNew Item!\n Description: %s %n Initial price at $%.2f %n \n",
+							b.getItem().getDescription(), b.getItem().getInitialPrice());
+					bw.get(i).write(output);
 					b.getHandler().sendInterested(b.getItem());
 				}//start_bidding
 				else if (id == 5) {
+					bw.get(i).write("You can now bid for the item!\n");
 					(new Thread(new BidThread(bXML, b))).start();
 				//auction_complete
 				} else if (id ==8) {
-					auction_is_on = false;
+					auction_is_on ++;
+					bw.get(i).write("\nThe auction is completed! \n");
+					b.printItemsBought(bw.get(i));
+					bw.get(i).write("Thank you for participating!\n");
 				}
 			}
 		}
-
+		for (int i = 0; i < bw.size(); i++)
+			bw.get(i).close();
 	}
-
 }
