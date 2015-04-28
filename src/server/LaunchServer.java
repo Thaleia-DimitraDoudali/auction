@@ -6,15 +6,15 @@ import java.io.FileReader;
 import java.io.IOException;
 
 public class LaunchServer {
-
-	public static void main(String[] args) {
-
+	
+	public LaunchServer(String port, String file) {
 		// Read bidderPort from args, it will be different for each auctioneer
-		int bidderPort = Integer.parseInt(args[0]);
+		int bidderPort = Integer.parseInt(port);
 		DBconnector db1 = null, db2 = null;
 		BufferedReader br = null;
+		String[] inp;
 		try {
-			br = new BufferedReader(new FileReader(args[1]));
+			br = new BufferedReader(new FileReader(file));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -24,22 +24,22 @@ public class LaunchServer {
 		String line;
 		try {
 			line = br.readLine();
-			args = line.split("\\s+");
-			L = Integer.parseInt(args[0]);
+			inp = line.split("\\s+");
+			L = Integer.parseInt(inp[0]);
 
 			// read number of items
 			line = br.readLine();
-			args = line.split("\\s+");
-			N = Integer.parseInt(args[0]);
+			inp = line.split("\\s+");
+			N = Integer.parseInt(inp[0]);
 
 			// read items and store to the two databases
 			db1 = new DBconnector(1);
 			db2 = new DBconnector(2);
 			for (int i = 1; i <= N; i++) {
 				line = br.readLine();
-				args = line.split("\\s+");
-				double price = Double.parseDouble(args[0]);
-				String description = line.replace(args[0], "");
+				inp = line.split("\\s+");
+				double price = Double.parseDouble(inp[0]);
+				String description = line.replace(inp[0], "");
 				description = description.trim();
 				Item item = new Item(i, price, description);
 				// Store items to databases
@@ -63,7 +63,11 @@ public class LaunchServer {
 		sync.setAuct2(auct2);
 		Thread t2 = (new Thread(auct2));
 		t2.start();
+	}
 
+	public static void main(String[] args) {
+
+		new LaunchServer(args[0], args[1]);
 	}
 
 }

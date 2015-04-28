@@ -67,13 +67,24 @@ public class ParseXML {
 
 	}
 
-	public static void main(String[] args) {
-		ParseXML parser = new ParseXML();
-		System.out.println("-----------------Bidders for Auctioneer 1--------------");
-		for (int i = 0; i < parser.bidders1.size(); i++)
-			parser.bidders1.get(i).print();
-		System.out.println("-----------------Bidders for Auctioneer 2--------------");
-		for (int i = 0; i < parser.bidders2.size(); i++)
-			parser.bidders2.get(i).print();
+
+	public ArrayList<BidderXML> getBidders1() {
+		return bidders1;
 	}
+
+
+	public void setBidders1(ArrayList<BidderXML> bidders1) {
+		this.bidders1 = bidders1;
+	}
+
+
+	public ArrayList<BidderXML> getBidders2() {
+		return bidders2;
+	}
+
+
+	public void setBidders2(ArrayList<BidderXML> bidders2) {
+		this.bidders2 = bidders2;
+	}
+
 }

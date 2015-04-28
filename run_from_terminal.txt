@@ -18,3 +18,12 @@
 
 Note:
 	Now the jars contain both the server and client code, which is not a good thing in general
+	
+3. Run driver
+   eclipse->file->export->Java->Runnable JAR file-> 
+	Launch configuration = LaunchDriver 
+	Export destination = code file
+	Name jar = driver.jar
+	Package required libraries into generated JAR
+
+   terminal-> java -jar server.jar <bidderPort> /path/to/items.txt
