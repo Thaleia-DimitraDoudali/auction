@@ -85,6 +85,12 @@ public class Auctioneer implements Runnable {
 			handler.sendMessage(message, entry.getSocketChannel());
 			return;
 		}
+		//Check for no_holder as well
+		if (temp.equals("no_holder")) {
+			String message = "9 duplicate_name Please abort";
+			handler.sendMessage(message, entry.getSocketChannel());
+			return;
+		}
 		if (flag == 0) {
 			regTable.add(entry);
 			db.addBidderToDB(entry);
@@ -151,6 +157,17 @@ public class Auctioneer implements Runnable {
 		System.out.println("[" + serverId + "] " + message);
 		// send to all interested bidders
 		sync.sendToAllInterested(message);
+	}
+	
+	// new reduced price
+	public void newReducedPrice() {
+		String message = "6 new_high_bid" + ' '
+				+ db.getItem(index).getCurrentPrice() + ' '
+				+ db.getItem(index).getHighestBidderName() + ' '
+				+ db.getItem(index).getItemId();
+		System.out.println("[" + serverId + "] " + message);
+		for (RegTableEntry entry : interestedBidders)
+			handler.sendMessage(message, entry.getSocketChannel());
 	}
 
 	// stop_bidding
@@ -311,6 +328,15 @@ public class Auctioneer implements Runnable {
 			index = 0;
 			//iterate through all the items on the database
 			for (int i = 0; i < N; i++) {
+				
+				//synchronize
+				sync.reset();
+				boolean wait = true;
+				while (wait) {
+					wait = sync.wait(serverId);
+					System.err.println("[" + serverId + "] Waiting...");
+				}
+				
 				index++;
 				Item item = db.getItem(index);
 				if (item.getSold() == 1)
@@ -323,15 +349,7 @@ public class Auctioneer implements Runnable {
 					interested = 0;
 					interestedBidders.clear();
 					bidded = 0;
-
-					//synchronize
-				/*	sync.reset();
-					boolean wait = true;
-					while (wait) {
-						wait = sync.proceed(serverId);
-						System.err.println("[" + serverId + "] Waiting...");
-					}
-					*/
+					
 					// Send new_item to registered bidders
 					this.bidItem();
 
@@ -379,6 +397,7 @@ public class Auctioneer implements Runnable {
 					}
 
 					// System.out.println("after I am interested!");
+
 
 					// If at least one bidders are interested
 					if (this.interestedBidders.size() >= 1) {
@@ -468,7 +487,7 @@ public class Auctioneer implements Runnable {
 										// Send new reduced price
 										double reducedPrice = 0.9 * db.getItem(index).getCurrentPrice();
 										db.setItemCurrPrice(index, reducedPrice);
-										this.newHighBid();
+										this.newReducedPrice();
 										// System.out.println("10 down! ");
 									}
 								}

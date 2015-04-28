@@ -26,4 +26,4 @@ Note:
 	Name jar = driver.jar
 	Package required libraries into generated JAR
 
-   terminal-> java -jar server.jar <bidderPort> /path/to/items.txt
+   terminal-> java -jar server.jar /path/to/conf.xml <bidderPort> /path/to/items.txt

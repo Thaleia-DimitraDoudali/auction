@@ -3,8 +3,8 @@ package server;
 public class SyncServer {
 
 	private DBconnector db1, db2;
-	private int proceed1 = -1, proceed2 = 0;
-	private Auctioneer auct1, auct2;			
+	private int wait1 = -1, wait2 = 0;
+	private Auctioneer auct1, auct2;	
 	
 	public SyncServer(DBconnector db1, DBconnector db2) {
 		this.db1 = db1;
@@ -12,12 +12,24 @@ public class SyncServer {
 	}
 	
 	//Custom barrier function
-	public boolean proceed(int serverId) {
+	public boolean wait(int serverId) {
+		
+		int reg1 = auct1.getRegTable().size();
+		int reg2 = auct2.getRegTable().size();
+		int index1 = auct1.getIndex();
+		int index2 = auct2.getIndex();
+		
 		if (serverId == 1)
-			proceed1 = 1;
-		if (serverId == 2)
-			proceed2 = 1;
-		if (proceed1 == proceed2) {
+			wait1 = 1;
+		else if (serverId == 2)
+			wait2 = 1;
+		
+		//If the other server has no registered users, and both servers are on the same item, then proceed
+		if (serverId ==1 && reg2 == 0 && index1 == index2)
+			return false;
+		else if (serverId == 2 && reg1 == 0 && index1 == index2)
+			return false;
+		if (wait1 == wait2) {
 			return false;
 		}
 		else
@@ -25,10 +37,10 @@ public class SyncServer {
 	}
 	
 	public void reset() {
-		proceed1 = -1;
-		proceed2 = 0;
+		wait1 = -1;
+		wait2 = 0;
 	}
-	
+		
 	//On new_high_bid sync the 2 databases to have one consistent item
 	public void syncBids(int itemId) {
 		Item item1 = db1.getItem(itemId);
@@ -136,5 +148,4 @@ public class SyncServer {
 	public void setAuct1(Auctioneer auct1) {
 		this.auct1 = auct1;
 	}
-	
 }

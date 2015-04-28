@@ -19,8 +19,8 @@ public class ParseXML {
 	private ArrayList<BidderXML> bidders2 = new ArrayList<BidderXML>();
 
 
-	public ParseXML() {
-		File xmlFile = new File("conf.xml");
+	public ParseXML(String path) {
+		File xmlFile = new File(path);
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder;
 		Document doc;

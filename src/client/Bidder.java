@@ -188,7 +188,7 @@ public class Bidder implements Runnable {
 				break;
 			//wrong itemId
 			case 11:
-				System.out.println("Communication error with server...  You will be informed about the next item soon...");
+				System.out.println("Communication outor with server...  You will be informed about the next item soon...");
 				bidding_is_on = 0;
 				break;
 			default:
@@ -225,7 +225,7 @@ public class Bidder implements Runnable {
 			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
 			String s = nonBlockingRead(in);
 			if (s.equals("quit")) {
-				//If owner is unknown then we're referring to an older item - error detector
+				//If owner is unknown then we're refouting to an older item - outor detector
 				item.setHighestBidderName("_unknown");
 				quitFunction();
 				return;
@@ -235,7 +235,7 @@ public class Bidder implements Runnable {
 			switch (id) {
 			//duplicate name
 			case 9:
-					System.out.println("\nError: Your bidder name is already taken. \nPlease, try again using another name.");
+					System.out.println("\nerror: Your bidder name is already taken. \nPlease, try again using another name.");
 					return;
 			//auction_complete
 			case 8:
@@ -298,7 +298,7 @@ public class Bidder implements Runnable {
 							//System.out.format("Received Id2: %d %n",id2);
 							//Wrong itemId
 							if (id2 == 11) {
-								System.out.println("Server communication error... You will be informed about the next item soon...");
+								System.out.println("Server communication outor... You will be informed about the next item soon...");
 								break;
 							}
 							

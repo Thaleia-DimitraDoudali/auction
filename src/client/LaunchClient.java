@@ -12,18 +12,17 @@ import client.Bidder;
 
 public class LaunchClient {
 
-	public static void main(String[] args) {
-		
+	public LaunchClient(String ip, String port, String name) {
 		//Read hostname and bidderPort from cat auct_name, thus args[0], args[1] and bidderName from args[2]
-		System.out.println(args[0] + " " + args[1] + " " + args[2]);
+		System.out.println(ip + " " + port + " " + name);
 		InetAddress hostname = null;
 		try {
-			hostname = InetAddress.getByName(args[0]);
+			hostname = InetAddress.getByName(ip);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
-		int bidderPort = Integer.parseInt(args[1]);
-		String bidderName = args[2];
+		int bidderPort = Integer.parseInt(port);
+		String bidderName = name;
 		//if bidderName == no_holder, it's not permitted, so read the bidderName from the terminal 
 		if (bidderName.equals("no_holder")) {
 			//Read client's name
@@ -40,7 +39,11 @@ public class LaunchClient {
 		//Launch bidder
 		Bidder bidder = new Bidder(bidderName, bidderPort, hostname);
 		(new Thread(bidder)).start();
-
+	}
+	
+	public static void main(String[] args) {
+		
+		new LaunchClient(args[0], args[1], args[2]);
 	}
 
 }
