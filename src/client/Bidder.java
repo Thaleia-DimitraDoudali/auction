@@ -30,6 +30,10 @@ public class Bidder implements Runnable {
 	public Item getItem(){
 		return item;
 	}
+	
+	public void setItem(Item item) {
+		this.item = item;
+	}
 
 	public String getBidderName() {
 		return bidderName;
@@ -69,6 +73,10 @@ public class Bidder implements Runnable {
 
 	public InetAddress getHostName() {
 		return this.hostname;
+	}
+	
+	public void addToItemsBought(Item it) {
+		this.itemsBought.add(it);
 	}
 	
 	//Prints on terminal the items this bidder has bought (the elements of itemsBought)

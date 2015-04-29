@@ -141,6 +141,7 @@ public class MessageClientHandler {
 					(bidder.getItem()).setHighestBidderName(args[3]);
 					mtype = 6;
 				}
+				bidder.getItem().print();
 				break;
 			//stop_bidding
 			case '7':
