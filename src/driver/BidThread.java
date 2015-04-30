@@ -22,7 +22,7 @@ public class BidThread implements Runnable {
 		for (int i = 0; i < bidder.getBids().size(); i++) {
 			//sleep
 			try {
-				Thread.sleep((long) (1000*bidder.getFreq()));
+				Thread.sleep((long) (10000*bidder.getFreq()));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

@@ -113,7 +113,6 @@ public class LaunchDriver {
 				BidderXML bXML = biddersXML.get(i);
 				
 				int id = b.getHandler().receiveMessage();
-				
 				switch (id) {
 					//new_item
 					case 4:

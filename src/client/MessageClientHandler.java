@@ -105,7 +105,7 @@ public class MessageClientHandler {
 		String[] args;
 		int mtype;
 		
-		//System.out.format("Received messageId: %s %n",message);
+		System.out.format("Received messageId: %s %n",message);
 		
 		switch (messageId) {
 		

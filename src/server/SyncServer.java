@@ -107,10 +107,12 @@ public class SyncServer {
 	}
 	
 	public void sendToAllInterested (String message) {
-		for (RegTableEntry entry1 : auct1.getInterestedBidders())
+		for (RegTableEntry entry1 : auct1.getInterestedBidders()) {
 			auct1.getHandler().sendMessage(message, entry1.getSocketChannel());
-		for (RegTableEntry entry2 : auct2.getInterestedBidders())
+		}
+		for (RegTableEntry entry2 : auct2.getInterestedBidders()) {
 			auct1.getHandler().sendMessage(message, entry2.getSocketChannel());
+		}
 	}
 	
 	//Getters - Setters
