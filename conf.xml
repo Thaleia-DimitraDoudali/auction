@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<auction>
+	<auctioneer>
+		<bidder>
+			<name>thaleia</name>
+			<frequency>1</frequency>
+			<bid>100</bid>
+			<bid>200</bid>
+			<bid>300</bid>
+			<bid>400</bid>
+		</bidder>
+		<bidder>
+			<name>sofia</name>
+			<frequency>1.5</frequency>
+			<bid>300</bid>
+			<bid>400</bid>
+		</bidder>
+	</auctioneer>
+	
+	<auctioneer>
+		<bidder>
+			<name>kwnstantina</name>
+			<frequency>1.5</frequency>
+			<bid>30</bid>
+			<bid>100</bid>
+		</bidder>
+		<bidder>
+			<name>christos</name>
+			<frequency>2</frequency>
+			<bid>100</bid>
+		</bidder>
+	</auctioneer>
+</auction>
