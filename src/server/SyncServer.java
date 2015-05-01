@@ -109,9 +109,11 @@ public class SyncServer {
 	public void sendToAllInterested (String message) {
 		for (RegTableEntry entry1 : auct1.getInterestedBidders()) {
 			auct1.getHandler().sendMessage(message, entry1.getSocketChannel());
+			System.out.println("[" + auct1.getServerId() + "] " + message);
 		}
 		for (RegTableEntry entry2 : auct2.getInterestedBidders()) {
-			auct1.getHandler().sendMessage(message, entry2.getSocketChannel());
+			auct2.getHandler().sendMessage(message, entry2.getSocketChannel());
+			System.out.println("[" + auct2.getServerId() + "] " + message);
 		}
 	}
 	

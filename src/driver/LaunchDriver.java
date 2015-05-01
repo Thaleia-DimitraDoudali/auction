@@ -23,6 +23,7 @@ public class LaunchDriver {
 		}
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) throws IOException {
 		
 		//Parse configuration file
@@ -106,6 +107,9 @@ public class LaunchDriver {
 		}
 		}
 		
+		ArrayList<Thread> thr = new ArrayList<Thread>();
+		int bid_stopped[] = new int[bidders.size()];
+		
 		int auction_is_on = 0;
 		while (auction_is_on < bidders.size()){
 			for (int i = 0; i < bidders.size(); i++) {
@@ -116,39 +120,53 @@ public class LaunchDriver {
 				switch (id) {
 					//new_item
 					case 4:
+						bid_stopped[i] = 0;
+						if (bid_stopped[i] == 0) {
 						//all bidders will be interested for all items
 						String output = String.format("\nNew Item!\n Description: %s %n Initial price at $%.2f %n \n",
 								b.getItem().getDescription(), b.getItem().getInitialPrice());
 						bw.get(i).write(output);
 						b.getHandler().sendInterested(b.getItem());
+						}
+						break;
 					//start_bidding
 					case 5:
-						bw.get(i).write("You can now bid for the item!\n");
-						(new Thread(new BidThread(bXML, b, bw.get(i)))).start();
+						if (bid_stopped[i] == 0) {
+						bw.get(i).write("You can now bid for the item!\n");						
+						Thread t = new Thread(new BidThread(bXML, b, bw.get(i)));
+						thr.add(t);
+						t.start();
+						}
+						break;
 					//new_high_bid
 					case 6:
+						if (bid_stopped[i] == 0) {
 						//Current client is the higher bidder
 						if (b.getItem().getHighestBidderName().equals(b.getBidderName()))
 							bw.get(i).write("Your bid has been accepted for the item! Keep bidding!\n>> ");
 						else {
 							//No one iterested = no_holder so price is reduced by server
 							if (b.getItem().getHighestBidderName().equals("no_holder")) {
-								output = String.format("The item has now a new reduced value: " + "$%.2f %n \n", 
+								String output = String.format("The item has now a new reduced value: " + "$%.2f %n \n", 
 										b.getItem().getCurrentPrice());
 								bw.get(i).write(output);
 								bw.get(i).write("Start bidding now!\n>> ");
 							}
 							//Another client is the higher bidder
 							else {
-								output = String.format("\nThe current highest bid is " + "$%.2f" + " and belongs to " 
+								String output = String.format("\nThe current highest bid is " + "$%.2f" + " and belongs to " 
 										+ "%s!", b.getItem().getCurrentPrice(), b.getItem().getHighestBidderName());
 								bw.get(i).write(output);
 								bw.get(i).write("Keep bidding!\n>> ");
 							}
 						}
+						}
+						break;
 					//stop_bidding
-					//TODO: stop thread
 					case 7:
+						if (bid_stopped[i] == 0) {
+						thr.get(i).stop();
+						bid_stopped[i] = 1;
 						bw.get(i).write("\nYou can no longer bid for this item!\n");
 						bw.get(i).write("Please wait for the results of the auction...\n");
 						//When bidding stops check who bought the item
@@ -166,17 +184,21 @@ public class LaunchDriver {
 							}
 							//Another client bought it
 							else if (!((b.getItem().getHighestBidderName()).equals("_unknown"))) {
-								output = String.format("The item was granted to " + "%s" + " who offered " + "$%.2f %n", b.getItem().getHighestBidderName(), b.getItem().getCurrentPrice());
+								String output = String.format("The item was granted to " + "%s" + " who offered " + "$%.2f %n", b.getItem().getHighestBidderName(), b.getItem().getCurrentPrice());
 								bw.get(i).write(output);
 							}
 						}
+						}
+						break;
 					//auction_complete
 					case 8:
 						auction_is_on ++;
 						bw.get(i).write("\nThe auction is completed! \n");
 						b.printItemsBought(bw.get(i));
 						bw.get(i).write("Thank you for participating!\n");
-					
+						break;
+					default:
+						break;
 				}
 			}
 		}

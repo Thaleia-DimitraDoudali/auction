@@ -105,7 +105,7 @@ public class MessageClientHandler {
 		String[] args;
 		int mtype;
 		
-		System.out.format("Received messageId: %s %n",message);
+		//System.out.format("Received messageId: %s %n",message);
 		
 		switch (messageId) {
 		
@@ -141,7 +141,6 @@ public class MessageClientHandler {
 					(bidder.getItem()).setHighestBidderName(args[3]);
 					mtype = 6;
 				}
-				bidder.getItem().print();
 				break;
 			//stop_bidding
 			case '7':

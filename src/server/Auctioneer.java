@@ -154,7 +154,6 @@ public class Auctioneer implements Runnable {
 				+ db.getItem(index).getCurrentPrice() + ' '
 				+ db.getItem(index).getHighestBidderName() + ' '
 				+ db.getItem(index).getItemId();
-		System.out.println("[" + serverId + "] " + message);
 		// send to all interested bidders
 		sync.sendToAllInterested(message);
 	}
@@ -195,7 +194,7 @@ public class Auctioneer implements Runnable {
 			e.printStackTrace();
 		}
 		// close all channels
-		for (RegTableEntry entry : regTable)
+		/*for (RegTableEntry entry : regTable)
 			try {
 				(entry.getSocketChannel()).close();
 			} catch (IOException e) {
@@ -206,7 +205,7 @@ public class Auctioneer implements Runnable {
 			ssc.close();
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}*/
 	}
 
 	// What an auctioneer thread does
