@@ -17,7 +17,8 @@ public class LaunchClient {
 		System.out.println(ip + " " + port + " " + name);
 		InetAddress hostname = null;
 		try {
-			hostname = InetAddress.getByName(ip);
+			//hostname = InetAddress.getByName(ip);
+			hostname = InetAddress.getLocalHost();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}

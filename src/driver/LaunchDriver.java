@@ -41,7 +41,8 @@ public class LaunchDriver {
 		//Launch Clients - all clients will be interested in all items, bidding the same for all items
 		InetAddress hostname = null;
 		try {
-			hostname = InetAddress.getByName("localhost");
+			//hostname = InetAddress.getByName("localhost");
+			hostname = InetAddress.getLocalHost();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
