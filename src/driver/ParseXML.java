@@ -36,21 +36,36 @@ public class ParseXML {
 				NodeList nodeList = e.getElementsByTagName("bidder");
 				// for bidders
 				for (int i = 0; i < nodeList.getLength(); i++) {
-					ArrayList<String> bids = new ArrayList<String>();
+					//ArrayList<String> bids = new ArrayList<String>();
+					ArrayList<ItemBids> itembids = new ArrayList<ItemBids>();
+					
 					Element el = (Element) nodeList.item(i);
+					
 					String name = el.getElementsByTagName("name").item(0)
 							.getTextContent();
 					String freq = el.getElementsByTagName("frequency").item(0)
 							.getTextContent();
 					
-					BidderXML bidder = new BidderXML(name, Double.parseDouble(freq), bids);
+					BidderXML bidder = new BidderXML(name, Double.parseDouble(freq), itembids);
 					
-					NodeList nList = el.getElementsByTagName("bid");
-					// for bids
+					NodeList nList = el.getElementsByTagName("item");
+					// for items
 					for (int j = 0; j < nList.getLength(); j++) {
 						Element elem = (Element) nList.item(j);
-						String bid = elem.getTextContent();
-						bidder.addBid(bid);
+						String id = elem.getElementsByTagName("id").item(0).getTextContent();
+						ArrayList<String> bids = new ArrayList<String>();
+						
+						
+						NodeList bList = elem.getElementsByTagName("bid");
+						for (int l = 0; l < bList.getLength(); l++){
+							Element em = (Element) bList.item(l);
+							String bid = em.getTextContent();
+							//itembids.get(j).addBid(bid);
+							bids.add(bid);
+						}
+						
+						ItemBids item = new ItemBids(bids, id);
+						itembids.add(item);
 					}
 					if (k == 0)
 						bidders1.add(bidder);

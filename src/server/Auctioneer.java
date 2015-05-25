@@ -171,6 +171,7 @@ public class Auctioneer implements Runnable {
 
 	// stop_bidding
 	public void stopBidding() {
+		System.out.format(" index="+"%s",index);
 		String message = "7 stop_bidding" + ' '
 				+ db.getItem(index).getCurrentPrice() + ' '
 				+ db.getItem(index).getHighestBidderName() + ' '
@@ -323,7 +324,7 @@ public class Auctioneer implements Runnable {
 		// Iterate through the list of items until all items sold
 		int items_left = N;
 		boolean sold = false;
-		while (items_left > 0) {
+		//while (items_left > 0) {
 			index = 0;
 			//iterate through all the items on the database
 			for (int i = 0; i < N; i++) {
@@ -331,10 +332,12 @@ public class Auctioneer implements Runnable {
 				//synchronize
 				sync.reset();
 				boolean wait = true;
+				System.err.println("[" + serverId + "] Before Waiting...");
 				while (wait) {
 					wait = sync.wait(serverId);
-					System.err.println("[" + serverId + "] Waiting...");
+					//System.err.println("[" + serverId + "] Waiting...");
 				}
+				System.err.println("[" + serverId + "] After Waiting...");
 				
 				index++;
 				Item item = db.getItem(index);
@@ -512,7 +515,7 @@ public class Auctioneer implements Runnable {
 					}
 				}
 			}
-		} // All items sold!
+		//} // All items sold!
 		System.out.println("[" + serverId + "] Auction finished!");
 		// wait for system to stabilize before sending new message
 		try {
