@@ -4,6 +4,7 @@ public class SyncServer {
 
 	private DBconnector db1, db2;
 	private int wait1 = -1, wait2 = 0;
+	private int waitstop1 = -1, waitstop2 = 0;
 	private Auctioneer auct1, auct2;	
 	
 	public SyncServer(DBconnector db1, DBconnector db2) {
@@ -29,16 +30,39 @@ public class SyncServer {
 			return false;
 		else if (serverId == 2 && reg1 == 0 && index1 == index2)
 			return false;
-		if (wait1 == wait2) {
+		if ((wait1 == wait2) && (index1==index2) ) {
 			return false;
 		}
 		else
 			return true;
 	}
 	
-	public void reset() {
-		wait1 = -1;
-		wait2 = 0;
+public boolean wait_stop(int serverId) {
+		
+		if (serverId == 1)
+			waitstop1 = 1;
+		else if (serverId == 2)
+			waitstop2 = 1;
+		
+		if (waitstop1 == waitstop2) {
+			return false;
+		}
+		else
+			return true;
+	}
+	
+	public void reset(int serverid) {
+		if (serverid==1) 
+			wait1 = -1;
+		else
+			wait2 = 0;
+	}
+	
+	public void reset_stop(int serverid) {
+		if (serverid==1)
+			waitstop1 = 2;
+		else
+			waitstop2 = 3;
 	}
 		
 	//On new_high_bid sync the 2 databases to have one consistent item
@@ -106,15 +130,33 @@ public class SyncServer {
 		return false;
 	}
 	
-	public void sendToAllInterested (String message) {
+	public void sendToAllInterested1 (String message, int id) {
+		if (id==1){
 		for (RegTableEntry entry1 : auct1.getInterestedBidders()) {
 			auct1.getHandler().sendMessage(message, entry1.getSocketChannel());
 			System.out.println("[" + auct1.getServerId() + "] " + message);
 		}
+		}
+		else{
 		for (RegTableEntry entry2 : auct2.getInterestedBidders()) {
 			auct2.getHandler().sendMessage(message, entry2.getSocketChannel());
 			System.out.println("[" + auct2.getServerId() + "] " + message);
 		}
+		}
+	}
+	
+	public void sendToAllInterested (String message) {
+		
+		for (RegTableEntry entry1 : auct1.getInterestedBidders()) {
+			auct1.getHandler().sendMessage(message, entry1.getSocketChannel());
+			System.out.println("[" + auct1.getServerId() + "] " + message);
+		}
+		
+		for (RegTableEntry entry2 : auct2.getInterestedBidders()) {
+			auct2.getHandler().sendMessage(message, entry2.getSocketChannel());
+			System.out.println("[" + auct2.getServerId() + "] " + message);
+		}
+		
 	}
 	
 	//Getters - Setters

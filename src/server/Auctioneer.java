@@ -177,7 +177,7 @@ public class Auctioneer implements Runnable {
 				+ db.getItem(index).getHighestBidderName() + ' '
 				+ db.getItem(index).getItemId();
 		// send to all interested bidders
-		sync.sendToAllInterested(message);
+		sync.sendToAllInterested1(message,serverId);
 		//for (RegTableEntry entry : interestedBidders)
 			//handler.sendMessage(message, entry.getSocketChannel());
 	}
@@ -330,7 +330,7 @@ public class Auctioneer implements Runnable {
 			for (int i = 0; i < N; i++) {
 				
 				//synchronize
-				sync.reset();
+				sync.reset(serverId);
 				boolean wait = true;
 				System.err.println("[" + serverId + "] Before Waiting...");
 				while (wait) {
@@ -500,6 +500,12 @@ public class Auctioneer implements Runnable {
 								// bidding process and sell the item
 								this.stopBidding();
 								offer_is_on = 0;
+								boolean wait_stop = true;
+								sync.reset_stop(serverId);
+								while (wait_stop) {
+									wait_stop = sync.wait_stop(serverId);
+									//System.err.println("[" + serverId + "] Waiting...");
+								}
 								db.setItemSold(index);
 								sync.syncItemSold(serverId, index);
 								items_left--;
