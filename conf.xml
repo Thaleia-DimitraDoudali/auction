@@ -3,31 +3,42 @@
 	<auctioneer>
 		<bidder>
 			<name>thaleia</name>
-			<frequency>1</frequency>
-			<bid>100</bid>
-			<bid>200</bid>
-			<bid>300</bid>
-			<bid>400</bid>
+			<item>
+				<frequency>0.5</frequency>
+				<id>1</id>
+				<bid>100</bid>
+				<bid>200</bid>
+			</item>
 		</bidder>
 		<bidder>
 			<name>sofia</name>
-			<frequency>1.5</frequency>
-			<bid>300</bid>
-			<bid>400</bid>
-		</bidder>
+			<item>
+				<frequency>1</frequency>
+				<id>2</id>
+				<bid>100</bid>
+				<bid>200</bid>
+			</item>
+			</bidder>
 	</auctioneer>
 	
 	<auctioneer>
 		<bidder>
 			<name>kwnstantina</name>
-			<frequency>1.5</frequency>
-			<bid>30</bid>
-			<bid>100</bid>
-		</bidder>
+			<item>
+				<frequency>0.7</frequency>
+				<id>1</id>
+				<bid>300</bid>
+				<bid>400</bid>
+			</item>
+			</bidder>
 		<bidder>
 			<name>christos</name>
-			<frequency>2</frequency>
-			<bid>100</bid>
-		</bidder>
+			<item>
+				<frequency>1.5</frequency>
+				<id>2</id>
+				<bid>300</bid>
+				<bid>400</bid>
+			</item>
+			</bidder>
 	</auctioneer>
 </auction>

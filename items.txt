@@ -1,7 +1,4 @@
 10000
-5
-100 A flower that gives eternal life
-250 A dragon scale
-50   A golden swordfish
-150 Obama autograph
-1000 Donatella Versace's teardrop
+2
+100 A china pot
+300 An apothecary table
