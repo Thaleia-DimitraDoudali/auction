@@ -6,11 +6,13 @@ public class ItemBids{
 	
 	private ArrayList<String> bids = new ArrayList<String>();
 	private String id;
+	private String freq;
 	
-	public ItemBids(ArrayList<String> bids, String id){
+	public ItemBids(ArrayList<String> bids, String id, String freq){
 		
 		this.bids=bids;
 		this.id=id;
+		this.freq=freq;
 	}
 	
 	public ArrayList<String> getBids() {
@@ -27,6 +29,14 @@ public class ItemBids{
 
 	public void setid(String id) {
 		this.id = id;
+	}
+	
+	public String getfreq() {
+		return freq;
+	}
+
+	public void setfreq(String freq) {
+		this.freq = freq;
 	}
 	
 	public void addBid(String bid) {

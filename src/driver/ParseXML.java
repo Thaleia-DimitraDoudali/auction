@@ -43,16 +43,17 @@ public class ParseXML {
 					
 					String name = el.getElementsByTagName("name").item(0)
 							.getTextContent();
-					String freq = el.getElementsByTagName("frequency").item(0)
-							.getTextContent();
+					//String freq = el.getElementsByTagName("frequency").item(0)
+						//	.getTextContent();
 					
-					BidderXML bidder = new BidderXML(name, Double.parseDouble(freq), itembids);
+					BidderXML bidder = new BidderXML(name, itembids);
 					
 					NodeList nList = el.getElementsByTagName("item");
 					// for items
 					for (int j = 0; j < nList.getLength(); j++) {
 						Element elem = (Element) nList.item(j);
 						String id = elem.getElementsByTagName("id").item(0).getTextContent();
+						String freq = elem.getElementsByTagName("frequency").item(0).getTextContent();
 						ArrayList<String> bids = new ArrayList<String>();
 						
 						
@@ -64,7 +65,7 @@ public class ParseXML {
 							bids.add(bid);
 						}
 						
-						ItemBids item = new ItemBids(bids, id);
+						ItemBids item = new ItemBids(bids, id, freq);
 						itembids.add(item);
 					}
 					if (k == 0)
