@@ -41,7 +41,8 @@ public class LaunchDriver {
 		//Launch Clients - all clients will be interested in all items, bidding the same for all items
 		InetAddress hostname = null;
 		try {
-			hostname = InetAddress.getByName("localhost");
+			//hostname = InetAddress.getByName("localhost");
+			hostname = InetAddress.getLocalHost();
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		}
@@ -109,8 +110,11 @@ public class LaunchDriver {
 		
 		ArrayList<Thread> thr = new ArrayList<Thread>();
 		int bid_stopped[] = new int[bidders.size()];
+		int item_flag[] = new int[bidders.size()];
+		int thr_index[] = new int[bidders.size()];
 		
 		int auction_is_on = 0;
+		
 		while (auction_is_on < bidders.size()){
 			for (int i = 0; i < bidders.size(); i++) {
 				Bidder b = bidders.get(i);
@@ -121,26 +125,43 @@ public class LaunchDriver {
 					//new_item
 					case 4:
 						bid_stopped[i] = 0;
+						item_flag[i] = 0;
 						if (bid_stopped[i] == 0) {
 						//all bidders will be interested for all items
 						String output = String.format("\nNew Item!\n Description: %s %n Initial price at $%.2f %n \n",
 								b.getItem().getDescription(), b.getItem().getInitialPrice());
 						bw.get(i).write(output);
-						b.getHandler().sendInterested(b.getItem());
+						
+						int id_curr = b.getItem().getItemId();
+						//The bidder sends i am interested only for the items in his list
+						for (int l=0; l < bXML.getItemBids().size(); l++)
+							if (id_curr == Integer.parseInt(bXML.getItemBids().get(l).getid())) {
+								b.getHandler().sendInterested(b.getItem());
+								item_flag[i] = 1;
+								break;
+							}
+						
+						if (item_flag[i] == 0) {
+							bw.get(i).write("You will be notified for the next available item\n ");
+							System.out.print("You will be notified for the next available item\n");
+						}
+						
 						}
 						break;
 					//start_bidding
 					case 5:
-						if (bid_stopped[i] == 0) {
-						bw.get(i).write("You can now bid for the item!\n");						
+						if ( (bid_stopped[i] == 0) && (item_flag[i] == 1)) {
+						bw.get(i).write("You can now bid for the item!\n");		
+						System.out.print("\n You can now bid for the item \n");
 						Thread t = new Thread(new BidThread(bXML, b, bw.get(i)));
+						thr_index[i] = thr.size();
 						thr.add(t);
 						t.start();
 						}
 						break;
 					//new_high_bid
 					case 6:
-						if (bid_stopped[i] == 0) {
+						if ( (bid_stopped[i] == 0) && (item_flag[i] == 1)) {
 						//Current client is the higher bidder
 						if (b.getItem().getHighestBidderName().equals(b.getBidderName()))
 							bw.get(i).write("Your bid has been accepted for the item! Keep bidding!\n>> ");
@@ -164,8 +185,10 @@ public class LaunchDriver {
 						break;
 					//stop_bidding
 					case 7:
-						if (bid_stopped[i] == 0) {
-						thr.get(i).stop();
+						if ( (bid_stopped[i] == 0) && (item_flag[i] == 1)) {
+							String name=b.getBidderName();
+							System.out.format("received stop_bidding bidder: " + "%s",name);
+						thr.get(thr_index[i]).stop();
 						bid_stopped[i] = 1;
 						bw.get(i).write("\nYou can no longer bid for this item!\n");
 						bw.get(i).write("Please wait for the results of the auction...\n");

@@ -331,10 +331,18 @@ public class Auctioneer implements Runnable {
 				//synchronize
 				sync.reset();
 				boolean wait = true;
+				System.err.println("[" + serverId + "] Before Waiting...");
 				while (wait) {
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					wait = sync.wait(serverId);
-					System.err.println("[" + serverId + "] Waiting...");
+					//System.err.println("[" + serverId + "] Waiting...");
 				}
+				System.err.println("[" + serverId + "] After Waiting...");
 				
 				index++;
 				Item item = db.getItem(index);
