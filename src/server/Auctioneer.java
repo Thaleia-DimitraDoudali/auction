@@ -160,7 +160,7 @@ public class Auctioneer implements Runnable {
 	
 	// new reduced price
 	public void newReducedPrice() {
-		String message = "6 new_high_bid" + ' '
+		String message = "6 new_reduced_price" + ' '
 				+ db.getItem(index).getCurrentPrice() + ' '
 				+ db.getItem(index).getHighestBidderName() + ' '
 				+ db.getItem(index).getItemId();
@@ -482,8 +482,8 @@ public class Auctioneer implements Runnable {
 										this.stopBidding();
 										// At this point the item will get back to auction later on, so initialPrice
 										// becomes currentPrice
-										db.setItemInitPrice(index, db.getItem(index).getCurrentPrice());
-										sync.syncInitPrice(serverId, index, db.getItem(index).getCurrentPrice());
+										//db.setItemInitPrice(index, db.getItem(index).getCurrentPrice());
+										//sync.syncInitPrice(serverId, index, db.getItem(index).getCurrentPrice());
 										// System.out.println("Value can't drop more! Moving on to next item!");
 									} else {
 										// Send new reduced price
