@@ -9,6 +9,21 @@
 				<bid>100</bid>
 				<bid>200</bid>
 			</item>
+			<item>
+				<frequency>7</frequency>
+				<id>3</id>
+				<bid>100</bid>
+				<bid>200</bid>
+			</item>
+			<item>
+				<frequency>0.2</frequency>
+				<id>5</id>
+				<bid>90</bid>
+				<bid>110</bid>
+				<bid>180</bid>
+				<bid>300</bid>
+				<bid>500</bid>
+			</item>
 		</bidder>
 		<bidder>
 			<name>sofia</name>
@@ -18,7 +33,16 @@
 				<bid>100</bid>
 				<bid>200</bid>
 			</item>
-			</bidder>
+			<item>
+				<frequency>0.3</frequency>
+				<id>5</id>
+				<bid>101</bid>
+				<bid>120</bid>
+				<bid>200</bid>
+				<bid>310</bid>
+				<bid>590</bid>
+			</item>
+		</bidder>
 	</auctioneer>
 	
 	<auctioneer>
@@ -30,7 +54,21 @@
 				<bid>300</bid>
 				<bid>400</bid>
 			</item>
-			</bidder>
+			<item>
+				<frequency>7</frequency>
+				<id>3</id>
+				<bid>300</bid>
+				<bid>400</bid>
+			</item>
+			<item>
+				<frequency>0.4</frequency>
+				<id>5</id>
+				<bid>115</bid>
+				<bid>150</bid>
+				<bid>270</bid>
+				<bid>700</bid>
+			</item>
+		</bidder>
 		<bidder>
 			<name>christos</name>
 			<item>
@@ -39,6 +77,17 @@
 				<bid>300</bid>
 				<bid>400</bid>
 			</item>
-			</bidder>
+			<item>
+				<frequency>0.1</frequency>
+				<id>5</id>
+				<bid>100.5</bid>
+				<bid>110</bid>
+				<bid>120</bid>
+				<bid>130</bid>
+				<bid>140</bid>
+				<bid>180</bid>
+				<bid>190</bid>
+			</item>
+		</bidder>
 	</auctioneer>
 </auction>

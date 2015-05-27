@@ -143,7 +143,7 @@ public class LaunchDriver {
 						
 						if (item_flag[i] == 0) {
 							bw.get(i).write("You will be notified for the next available item\n ");
-							System.out.print("You will be notified for the next available item\n");
+							//System.out.print("You will be notified for the next available item\n");
 						}
 						
 						}
@@ -152,7 +152,7 @@ public class LaunchDriver {
 					case 5:
 						if ( (bid_stopped[i] == 0) && (item_flag[i] == 1)) {
 						bw.get(i).write("You can now bid for the item!\n");		
-						System.out.print("\n You can now bid for the item \n");
+						//System.out.print("\n You can now bid for the item \n");
 						Thread t = new Thread(new BidThread(bXML, b, bw.get(i)));
 						thr_index[i] = thr.size();
 						thr.add(t);
@@ -186,8 +186,8 @@ public class LaunchDriver {
 					//stop_bidding
 					case 7:
 						if ( (bid_stopped[i] == 0) && (item_flag[i] == 1)) {
-							String name=b.getBidderName();
-							System.out.format("received stop_bidding bidder: " + "%s",name);
+							//String name=b.getBidderName();
+							//System.out.format("received stop_bidding bidder: " + "%s",name);
 						thr.get(thr_index[i]).stop();
 						bid_stopped[i] = 1;
 						bw.get(i).write("\nYou can no longer bid for this item!\n");

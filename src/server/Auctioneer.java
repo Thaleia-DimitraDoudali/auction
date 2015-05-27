@@ -121,7 +121,7 @@ public class Auctioneer implements Runnable {
 				return 2;
 			}
 			// send new_high_bid -- moved it here as well
-			this.newHighBid();
+			//this.newHighBid();
 		}
 		return 10;
 	}
@@ -171,7 +171,20 @@ public class Auctioneer implements Runnable {
 
 	// stop_bidding
 	public void stopBidding() {
-		System.out.format(" index="+"%s",index);
+		boolean wait_stop = true;
+		sync.resetPassStop(serverId);
+		while (wait_stop) {
+			try {
+				Thread.sleep(100);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			wait_stop = sync.wait_stop(serverId);
+			//System.err.println("[" + serverId + "] Waiting...");
+		}
+		sync.reset_stop(serverId);
+		//System.out.format(" index="+"%s",index);
 		String message = "7 stop_bidding" + ' '
 				+ db.getItem(index).getCurrentPrice() + ' '
 				+ db.getItem(index).getHighestBidderName() + ' '
@@ -256,6 +269,9 @@ public class Auctioneer implements Runnable {
 			return;
 		}
 
+		sync.reset(serverId);
+		sync.reset_stop(serverId);
+		
 		long tStart, tMid, tEnd = 0;
 		tStart = System.currentTimeMillis();
 
@@ -319,6 +335,7 @@ public class Auctioneer implements Runnable {
 		int offer_is_on = 1;
 		int counter = 0;
 
+		
 		// System.out.println("reached list!");
 	
 		// Iterate through the list of items until all items sold
@@ -330,15 +347,15 @@ public class Auctioneer implements Runnable {
 			for (int i = 0; i < N; i++) {
 				
 				//synchronize
-				sync.reset(serverId);
 				boolean wait = true;
-				System.err.println("[" + serverId + "] Before Waiting...");
+				sync.resetPass(serverId);
+				//System.err.println("[" + serverId + "] Before Waiting...");
 				while (wait) {
 					wait = sync.wait(serverId);
 					//System.err.println("[" + serverId + "] Waiting...");
 				}
-				System.err.println("[" + serverId + "] After Waiting...");
-				
+				//System.err.println("[" + serverId + "] After Waiting...");
+				sync.reset(serverId);
 				index++;
 				Item item = db.getItem(index);
 				if (item.getSold() == 1)
@@ -500,12 +517,6 @@ public class Auctioneer implements Runnable {
 								// bidding process and sell the item
 								this.stopBidding();
 								offer_is_on = 0;
-								boolean wait_stop = true;
-								sync.reset_stop(serverId);
-								while (wait_stop) {
-									wait_stop = sync.wait_stop(serverId);
-									//System.err.println("[" + serverId + "] Waiting...");
-								}
 								db.setItemSold(index);
 								sync.syncItemSold(serverId, index);
 								items_left--;
